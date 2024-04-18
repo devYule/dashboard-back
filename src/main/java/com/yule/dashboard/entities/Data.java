@@ -5,6 +5,7 @@ import com.yule.dashboard.entities.enums.BaseState;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Setter
@@ -19,9 +20,11 @@ public class Data extends BaseAt {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "userId")
     private Users user;
 
+    @Enumerated
+    @ColumnDefault("1")
     private BaseState state;
 
 }

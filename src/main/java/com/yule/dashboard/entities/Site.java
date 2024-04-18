@@ -3,6 +3,7 @@ package com.yule.dashboard.entities;
 import com.yule.dashboard.entities.enums.SiteType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import lombok.*;
 
 @Getter
@@ -13,5 +14,6 @@ import lombok.*;
 @Entity
 @DiscriminatorValue("site")
 public class Site extends Data{
+    @Enumerated
     private SiteType site;
 }

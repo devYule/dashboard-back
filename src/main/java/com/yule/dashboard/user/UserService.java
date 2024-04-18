@@ -1,8 +1,11 @@
 package com.yule.dashboard.user;
 
 import com.yule.dashboard.entities.Users;
+import com.yule.dashboard.entities.enums.BaseState;
+import com.yule.dashboard.entities.enums.SearchbarStyle;
 import com.yule.dashboard.pbl.exception.ClientException;
 import com.yule.dashboard.pbl.exception.ExceptionCause;
+import com.yule.dashboard.pbl.security.SecurityFacade;
 import com.yule.dashboard.pbl.security.SecurityPrincipal;
 import com.yule.dashboard.pbl.security.SecurityProvider;
 import com.yule.dashboard.pbl.utils.MailAuthenticationUtils;
@@ -11,10 +14,12 @@ import com.yule.dashboard.user.model.data.req.LoginSuccessData;
 import com.yule.dashboard.user.model.data.req.SignupInfoData;
 import com.yule.dashboard.user.model.data.req.SignupMailCheckData;
 import com.yule.dashboard.user.model.data.req.SignupMailInfoData;
+import com.yule.dashboard.user.model.data.res.AccessTokenData;
 import com.yule.dashboard.user.model.data.res.CheckIdData;
 import com.yule.dashboard.user.model.data.res.CheckPwData;
 import com.yule.dashboard.user.model.data.res.RedisKeyData;
 import com.yule.dashboard.user.model.dto.WidgetVo;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,6 +36,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final SecurityProvider provider;
     private final MailAuthenticationUtils mailAuthenticationUtils;
+    private final SecurityFacade facade;
 
     // 탈퇴: history 에 저장 ( em 으로 json 화 ) , Users 테이블에는 모두 null 로 변경, state 비활성화로 변경.
 
@@ -51,14 +57,14 @@ public class UserService {
 
     @Transactional
     public LoginSuccessData checkPw(CheckPwData data) {
-        RedisBaseUserInfoEntity findInfo = userRepository.findById(data.key());
+        RedisBaseUserInfoEntity findInfo = userRepository.findByKey(data.key());
         if (!passwordEncoder.matches(data.pw(), findInfo.getPw())) {
             throw new ClientException(ExceptionCause.PW_NOT_MATCHES);
         }
         String at = genAndSaveToken(findInfo.getPk());
 
         // get widgets
-        List<WidgetVo> widgetVos = userRepository.getAllWidgets(findInfo.getPk(), 1)
+        List<WidgetVo> widgetVos = userRepository.getAllWidgets(findInfo.getPk(), BaseState.ACTIVATED, 1)
                 .stream()
                 .map(w -> WidgetVo.builder()
                         .id(w.getId())
@@ -104,9 +110,26 @@ public class UserService {
     }
 
     public LoginSuccessData mailCheck(SignupMailCheckData data) {
-        return new LoginSuccessData(genAndSaveToken(userRepository.findByKey(data.key()).getPk()), new ArrayList<>());
+        RedisBaseUserInfoEntity cacheUser = userRepository.findByKey(data.key());
+        Users saveUser = userRepository.save(Users.builder()
+                .loginId(cacheUser.getLoginId())
+                .pw(cacheUser.getPw())
+                .nick(cacheUser.getNick())
+                .mail(cacheUser.getMail())
+                .searchbar(SearchbarStyle.LINE)
+                .pic("default")
+                .state(BaseState.ACTIVATED)
+                .build());
+        return new LoginSuccessData(genAndSaveToken(saveUser.getId()), new ArrayList<>());
     }
 
+    public AccessTokenData refreshToken(HttpServletRequest request) {
+        String rt = userRepository.refreshToken(provider.getTokenFromHeader(request));
+        if (rt == null) {
+            throw new ClientException(ExceptionCause.TOKEN_IS_EXPIRED);
+        }
+        return new AccessTokenData(genAndSaveToken(facade.getId()));
+    }
 
     /* --- Extracted Methods -- */
 
@@ -124,4 +147,6 @@ public class UserService {
         userRepository.saveToken(at, rt);
         return at;
     }
+
+
 }

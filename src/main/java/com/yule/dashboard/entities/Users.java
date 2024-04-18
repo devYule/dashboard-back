@@ -3,11 +3,10 @@ package com.yule.dashboard.entities;
 import com.yule.dashboard.entities.superclasses.CreatedAt;
 import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.entities.enums.SearchbarStyle;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DialectOverride;
 
 @Getter
 @Setter
@@ -27,7 +26,11 @@ public class Users extends CreatedAt {
     private String nick;
     private String mail;
     private String pic;
+    @Enumerated
     private SearchbarStyle searchbar;
+
+    @Enumerated
+    @ColumnDefault("1")
     private BaseState state;
 
 }

@@ -1,5 +1,6 @@
 package com.yule.dashboard.entities;
 
+import com.yule.dashboard.entities.enums.HistoryType;
 import com.yule.dashboard.entities.superclasses.CreatedAt;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,6 +24,9 @@ public class History extends CreatedAt {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prev_id")
     private History prevId;
+
+    @Enumerated
+    private HistoryType type;
 
     @Column(name = "_value")
     private String value;

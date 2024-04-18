@@ -12,10 +12,11 @@ public enum ExceptionCause {
     NICK_IS_ALREADY_EXISTS(495, "nick is already exists"),
     ID_AND_NICK_IS_ALREADY_EXISTS(494, "id and nick is already exists"),
     MAIL_IS_ALREADY_EXISTS(493, "mail is already exists"),
-    RETRY_SIGN_UP(492, "need to retry sign up"),
-    TOKEN_IS_EXPIRED(491, "token is expired"),
-    PRIMARY_KEY_IS_NOT_VALID(490, "primary key is not valid check again"),
-    CAN_NOT_BE_ALL_NULL(489, "can not be null all arguments")
+    AUTH_CODE_IS_NOT_MATCHES(492, "need to retry sign up"),
+    RETRY_SIGN_UP(491, "need to retry sign up"),
+    TOKEN_IS_EXPIRED(490, "token is expired"),
+    PRIMARY_KEY_IS_NOT_VALID(489, "primary key is not valid check again"),
+    CAN_NOT_BE_ALL_NULL(488, "can not be null all arguments")
     ;
     private final int code;
     private final String msg;

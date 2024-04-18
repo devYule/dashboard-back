@@ -9,8 +9,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -21,12 +19,16 @@ public class MailAuthenticationUtils {
     private final JavaMailSender javaMailSender;
     private final String title = "Dashboard 에서 보낸 이메일 인증 메일입니다.";
 
-    private String genRandomKey() {
+    private String genRandomCode() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 6);
     }
 
+    private String genRandomKey(){
+        return UUID.randomUUID().toString().replace("-", "");
+    }
+
     public String sendAuthMail(String mail) {
-        String code = genRandomKey();
+        String code = genRandomCode();
         String msg = " Dashboard 에서 보낸 인증 메일입니다. 5분 이내에 입력해주세요.\n인증번호: " + code;
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {

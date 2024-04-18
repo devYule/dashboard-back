@@ -111,6 +111,7 @@ public class UserService {
 
     public LoginSuccessData mailCheck(SignupMailCheckData data) {
         RedisBaseUserInfoEntity cacheUser = userRepository.findByKey(data.key());
+        if (!cacheUser.getCode().equals(data.code())) throw new ClientException(ExceptionCause.AUTH_CODE_IS_NOT_MATCHES);
         Users saveUser = userRepository.save(Users.builder()
                 .loginId(cacheUser.getLoginId())
                 .pw(cacheUser.getPw())

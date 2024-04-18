@@ -77,7 +77,9 @@ public class UserRepository {
     }
 
     public String saveMailCode(String key, String code) {
-        return redisUserRepository.findById(key).orElseThrow(() -> new ClientException(ExceptionCause.RETRY_SIGN_UP)).getId();
+        RedisBaseUserInfoEntity userInfo = redisUserRepository.findById(key).orElseThrow(() -> new ClientException(ExceptionCause.RETRY_SIGN_UP));
+        userInfo.setCode(code);
+        return userInfo.getId();
     }
 
     public RedisBaseUserInfoEntity findByKey(String key) {

@@ -27,7 +27,7 @@ public class WidgetService {
     private final SecurityFacade facade;
 
     public BaseResponse addWidget(WidgetAddData data) {
-        Users findUser = userRepository.findByIdAndState(facade.getId(), BaseState.ACTIVATED);
+        Users findUser = userRepository.findById(facade.getId());
         Widget widget = new Widget(data.order(), WidgetSize.getByValue(data.width()), WidgetSize.getByValue(data.height()),
                 new UrlPath(data.url()), TrueOrFalse.getByValue(data.isShown()));
         widget.setUser(findUser);

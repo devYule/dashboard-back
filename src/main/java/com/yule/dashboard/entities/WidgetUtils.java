@@ -13,5 +13,5 @@ import lombok.*;
 public class WidgetUtils extends Widget {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "util_id")
-    private Utils utilId;
+    private Utils utils;
 }

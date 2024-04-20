@@ -1,4 +1,4 @@
-package com.yule.dashboard.bookmark.jparepo;
+package com.yule.dashboard.bookmark.repositories.queryrepo;
 
 import com.yule.dashboard.entities.BookMark;
 

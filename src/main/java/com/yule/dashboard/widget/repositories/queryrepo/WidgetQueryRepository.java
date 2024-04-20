@@ -1,4 +1,4 @@
-package com.yule.dashboard.widget.queryrepo;
+package com.yule.dashboard.widget.repositories.queryrepo;
 
 import com.yule.dashboard.entities.Widget;
 import com.yule.dashboard.entities.enums.BaseState;

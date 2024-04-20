@@ -7,7 +7,6 @@ import com.yule.dashboard.entities.Users;
 import com.yule.dashboard.entities.embeddable.UrlPath;
 import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.pbl.BaseResponse;
-import com.yule.dashboard.pbl.PrimaryKeyData;
 import com.yule.dashboard.pbl.security.SecurityFacade;
 import com.yule.dashboard.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,10 +33,10 @@ public class BookmarkService {
     }
 
     public BaseResponse addBookmark(BookmarkAddData data) {
-        Users findUser = userRepository.findByIdAndState(facade.getId(), BaseState.ACTIVATED);
+        Users findUser = userRepository.findById(facade.getId());
         BookMark bookMark = new BookMark(data.title(), new UrlPath(data.url()), data.memo());
         bookMark.setUser(findUser);
-        return BaseResponse.builder().value(bookmarkRepository.save(bookMark)).build();
+        return BaseResponse.builder().value(bookmarkRepository.save(bookMark).getId()).build();
     }
 
     @Transactional

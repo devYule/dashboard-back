@@ -1,24 +1,24 @@
 package com.yule.dashboard.my;
 
-import com.yule.dashboard.bookmark.BookmarkService;
-import com.yule.dashboard.bookmark.jparepo.BookmarkJpaRepository;
+import com.yule.dashboard.bookmark.repositories.jparepo.BookmarkJpaRepository;
 import com.yule.dashboard.entities.BookMark;
+import com.yule.dashboard.entities.History;
 import com.yule.dashboard.entities.Users;
-import com.yule.dashboard.entities.Widget;
 import com.yule.dashboard.entities.embeddable.UrlPath;
 import com.yule.dashboard.entities.enums.BaseState;
-import com.yule.dashboard.entities.enums.TrueOrFalse;
-import com.yule.dashboard.entities.enums.WidgetSize;
+import com.yule.dashboard.entities.enums.HistoryType;
+import com.yule.dashboard.mypage.repositories.jparepo.HistoryJpaRepository;
 import com.yule.dashboard.redis.entities.RedisBaseUserInfoEntity;
 import com.yule.dashboard.redis.repository.RedisUserRepository;
 import com.yule.dashboard.user.UserRepository;
-import com.yule.dashboard.user.jparepo.UserJpaRepository;
+import com.yule.dashboard.user.repositories.jparepo.UserJpaRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,9 +38,12 @@ public class Sketchbook {
     EntityManager em;
     @Autowired
     UserJpaRepository userJpaRepository;
+    @Autowired
+    HistoryJpaRepository historyJpaRepository;
 
     Long userId;
     Users user;
+
     @BeforeEach
     @Rollback(value = false)
     void before() {
@@ -48,7 +51,6 @@ public class Sketchbook {
                 .loginId("test")
                 .pw("test")
                 .nick("test")
-                .state(BaseState.ACTIVATED)
                 .build());
         userRepository.save(saveUser);
         userId = saveUser.getId();
@@ -88,11 +90,26 @@ public class Sketchbook {
         for (BookMark findBookmark : findBookmarks) {
             System.out.println("findBookmark.getMemo() = " + findBookmark.getMemo());
         }
-        System.out.println("userJpaRepository.findByLoginIdAndState(saveUser.getLoginId(), BaseState.ACTIVATED) = " + userJpaRepository.findByLoginIdAndState(user.getLoginId(), BaseState.ACTIVATED).getLoginId());
+        System.out.println("userJpaRepository.findByLoginIdAndState(saveUser.getLoginId(), BaseState.ACTIVATED) = " + userJpaRepository.findByLoginId(user.getLoginId()).getLoginId());
     }
 
     @Test
-    void checkNull() {
+    @Transactional
+    void historyTest1() {
+        // history 저장
+        historyJpaRepository.save(History.builder()
+                .user(user)
+                .type(HistoryType.PIC)
+                .build());
+        historyJpaRepository.flush();
 
+        History findHistory = historyJpaRepository.findFirstByUserAndType(user, HistoryType.PIC, Sort.by(Sort.Direction.DESC,
+                "id"));
+        System.out.println("findHistory.getId() = " + findHistory.getId());
+    }
+    @Test
+    @Transactional
+    void nickExistsTest() {
+        System.out.println("userJpaRepository.existsByNickAndState(user.getNick(), BaseState.ACTIVATED) = " + userJpaRepository.existsByNick(user.getNick()));
     }
 }

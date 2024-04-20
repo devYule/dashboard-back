@@ -1,8 +1,8 @@
-package com.yule.dashboard.widget.jparepo;
+package com.yule.dashboard.widget.repositories.jparepo;
 
 import com.yule.dashboard.entities.Widget;
 import com.yule.dashboard.entities.enums.BaseState;
-import com.yule.dashboard.widget.queryrepo.WidgetQueryRepository;
+import com.yule.dashboard.widget.repositories.queryrepo.WidgetQueryRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

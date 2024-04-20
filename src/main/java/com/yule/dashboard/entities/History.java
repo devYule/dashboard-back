@@ -19,11 +19,11 @@ public class History extends CreatedAt {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private Users userId;
+    private Users user;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prev_id")
-    private History prevId;
+    private History prev;
 
     @Enumerated
     private HistoryType type;

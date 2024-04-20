@@ -4,7 +4,7 @@ import com.yule.dashboard.entities.Widget;
 import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.pbl.exception.ClientException;
 import com.yule.dashboard.pbl.exception.ExceptionCause;
-import com.yule.dashboard.widget.jparepo.WidgetJpaRepository;
+import com.yule.dashboard.widget.repositories.jparepo.WidgetJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;

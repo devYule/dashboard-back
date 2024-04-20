@@ -9,9 +9,9 @@ import com.yule.dashboard.pbl.exception.ServerException;
 import com.yule.dashboard.pbl.security.SecurityProperties;
 import com.yule.dashboard.redis.entities.RedisBaseUserInfoEntity;
 import com.yule.dashboard.redis.repository.RedisUserRepository;
-import com.yule.dashboard.user.jparepo.UserJpaRepository;
-import com.yule.dashboard.user.queryrepo.UserQueryRepository;
-import com.yule.dashboard.widget.jparepo.WidgetJpaRepository;
+import com.yule.dashboard.user.repositories.jparepo.UserJpaRepository;
+import com.yule.dashboard.user.repositories.queryrepo.UserQueryRepository;
+import com.yule.dashboard.widget.repositories.jparepo.WidgetJpaRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -45,8 +45,8 @@ public class UserRepository {
         this.properties = properties;
     }
 
-    public Users findByLoginIdAndState(String userId) {
-        return userJpaRepository.findByLoginIdAndState(userId, BaseState.ACTIVATED);
+    public Users findByLoginId(String userId) {
+        return userJpaRepository.findByLoginId(userId);
     }
 
     public String save(RedisBaseUserInfoEntity userInfo) {
@@ -90,7 +90,11 @@ public class UserRepository {
         return redisTokenRepository.opsForValue().get(at);
     }
 
-    public Users findByIdAndState(Long id, BaseState state) {
-        return userJpaRepository.findByIdAndState(id, state).orElseThrow(ServerException::new);
+    public Users findById(Long id) {
+        return userJpaRepository.findById(id).orElseThrow(ServerException::new);
+    }
+
+    public boolean existsByNick(String nick) {
+        return userJpaRepository.existsByNick(nick);
     }
 }

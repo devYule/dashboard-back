@@ -13,5 +13,5 @@ import lombok.*;
 public class WidgetBookmark extends Widget {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bookmark_id")
-    private BookMark bookmarkId;
+    private BookMark bookmark;
 }

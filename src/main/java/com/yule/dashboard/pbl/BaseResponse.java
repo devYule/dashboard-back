@@ -9,5 +9,10 @@ import lombok.Getter;
 @AllArgsConstructor
 @Builder
 public class BaseResponse {
+
     private Long value;
+
+    public BaseResponse() {
+        this.value = 1L;
+    }
 }

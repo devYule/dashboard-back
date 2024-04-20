@@ -1,5 +1,6 @@
-package com.yule.dashboard.bookmark.jparepo;
+package com.yule.dashboard.bookmark.repositories.jparepo;
 
+import com.yule.dashboard.bookmark.repositories.queryrepo.BookmarkQueryRepository;
 import com.yule.dashboard.entities.BookMark;
 import com.yule.dashboard.entities.enums.BaseState;
 import org.springframework.data.jpa.repository.JpaRepository;

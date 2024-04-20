@@ -41,7 +41,7 @@ public class UserService {
     // 탈퇴: history 에 저장 ( em 으로 json 화 ) , Users 테이블에는 모두 null 로 변경, state 비활성화로 변경.
 
     public RedisKeyData checkId(CheckIdData loginId) {
-        Users user = userRepository.findByLoginIdAndState(loginId.loginId());
+        Users user = userRepository.findByLoginId(loginId.loginId());
         if (user == null) throw new ClientException(ExceptionCause.ID_NOT_EXISTS);
         RedisBaseUserInfoEntity cacheUser = RedisBaseUserInfoEntity.builder()
                 .pw(user.getPw())
@@ -119,7 +119,6 @@ public class UserService {
                 .mail(cacheUser.getMail())
                 .searchbar(SearchbarStyle.LINE)
                 .pic("default")
-                .state(BaseState.ACTIVATED)
                 .build());
         return new LoginSuccessData(genAndSaveToken(saveUser.getId()), new ArrayList<>());
     }

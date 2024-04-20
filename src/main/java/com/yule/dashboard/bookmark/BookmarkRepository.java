@@ -1,6 +1,6 @@
 package com.yule.dashboard.bookmark;
 
-import com.yule.dashboard.bookmark.jparepo.BookmarkJpaRepository;
+import com.yule.dashboard.bookmark.repositories.jparepo.BookmarkJpaRepository;
 import com.yule.dashboard.entities.BookMark;
 import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.pbl.exception.ClientException;
@@ -19,8 +19,8 @@ public class BookmarkRepository {
         return bookmarkJpaRepository.findByUserId(id);
     }
 
-    public Long save(BookMark bookMark) {
-        return bookmarkJpaRepository.save(bookMark).getId();
+    public BookMark save(BookMark bookMark) {
+        return bookmarkJpaRepository.save(bookMark);
     }
 
     public BookMark findOneByIdAndState(Long id) {

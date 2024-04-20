@@ -1,4 +1,4 @@
-package com.yule.dashboard.user.queryrepo;
+package com.yule.dashboard.user.repositories.queryrepo;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.yule.dashboard.entities.QUsers;
@@ -20,14 +20,14 @@ public class UserQueryRepository {
 
     public List<Users> checkSignupInfo(String loginId, String nick) {
         return query.selectFrom(users)
-                .where(users.loginId.eq(loginId).or(users.nick.eq(nick)).and(users.state.eq(BaseState.ACTIVATED)))
+                .where(users.loginId.eq(loginId).or(users.nick.eq(nick)))
                 .fetch();
     }
 
     public int cntByMail(String mail) {
         Long cnt = query.select(users.count())
                 .from(users)
-                .where(users.mail.eq(mail).and(users.state.eq(BaseState.ACTIVATED)))
+                .where(users.mail.eq(mail))
                 .fetchOne();
         return cnt == null ? 0 : cnt.intValue();
     }

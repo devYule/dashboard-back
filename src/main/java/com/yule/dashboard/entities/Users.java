@@ -29,8 +29,5 @@ public class Users extends CreatedAt {
     @Enumerated
     private SearchbarStyle searchbar;
 
-    @Enumerated
-    @ColumnDefault("1")
-    private BaseState state;
 
 }

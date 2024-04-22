@@ -21,6 +21,7 @@ public class RedisBaseUserInfoEntity {
     private String pic;
     private SearchbarStyle searchbar;
 
+    private String validMailKey;
     private String mail;
-    private String code;
+
 }

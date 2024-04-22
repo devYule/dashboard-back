@@ -8,7 +8,9 @@ import com.yule.dashboard.pbl.exception.ExceptionCause;
 import com.yule.dashboard.pbl.exception.ServerException;
 import com.yule.dashboard.pbl.security.SecurityProperties;
 import com.yule.dashboard.redis.entities.RedisBaseUserInfoEntity;
+import com.yule.dashboard.redis.enums.RedisDataType;
 import com.yule.dashboard.redis.repository.RedisUserRepository;
+import com.yule.dashboard.redis.utils.RedisUtils;
 import com.yule.dashboard.user.repositories.jparepo.UserJpaRepository;
 import com.yule.dashboard.user.repositories.queryrepo.UserQueryRepository;
 import com.yule.dashboard.widget.repositories.jparepo.WidgetJpaRepository;
@@ -27,7 +29,7 @@ public class UserRepository {
     private final RedisUserRepository redisUserRepository;
     private final WidgetJpaRepository widgetJpaRepository;
 
-    private final RedisTemplate<String, String> redisTokenRepository;
+    private final RedisTemplate<String, String> redisTokenAndMailRepository;
     private final SecurityProperties properties;
 
     public UserRepository(
@@ -35,13 +37,13 @@ public class UserRepository {
             UserQueryRepository userQueryRepository,
             RedisUserRepository redisUserRepository,
             WidgetJpaRepository widgetJpaRepository,
-            @Qualifier("TokenHolder") RedisTemplate<String, String> redisTokenRepository,
+            @Qualifier("TokenAndMailHolder") RedisTemplate<String, String> redisTokenAndMailRepository,
             SecurityProperties properties) {
         this.userJpaRepository = userJpaRepository;
         this.userQueryRepository = userQueryRepository;
         this.redisUserRepository = redisUserRepository;
         this.widgetJpaRepository = widgetJpaRepository;
-        this.redisTokenRepository = redisTokenRepository;
+        this.redisTokenAndMailRepository = redisTokenAndMailRepository;
         this.properties = properties;
     }
 
@@ -59,8 +61,8 @@ public class UserRepository {
 
 
     public void saveToken(String at, String rt) {
-        ValueOperations<String, String> rep = redisTokenRepository.opsForValue();
-        rep.set(at, rt, Duration.ofMillis(properties.getJwt().getRefreshTokenExpiry()));
+        ValueOperations<String, String> rep = redisTokenAndMailRepository.opsForValue();
+        rep.set(RedisDataType.TOKEN.getValue() + at, rt, Duration.ofMillis(properties.getJwt().getRefreshTokenExpiry()));
     }
 
     public List<Widget> getAllWidgets(Long id, BaseState state, int page) {
@@ -72,13 +74,18 @@ public class UserRepository {
 
     }
 
-    public int cntByMail(String mail) {
-        return userQueryRepository.cntByMail(mail);
+    public boolean existsByMail(String mail) {
+        return userJpaRepository.existsByMail(mail);
     }
 
     public String saveMailCode(String key, String code) {
         RedisBaseUserInfoEntity userInfo = redisUserRepository.findById(key).orElseThrow(() -> new ClientException(ExceptionCause.RETRY_SIGN_UP));
-        userInfo.setCode(code);
+        // token and mail 에 key value 로 저장,
+        // key 를 userInfo 에 저장.
+        // key 에는 userInfo 키가 있고, code 는 사용자가 입력해야할 code 가 들어 있음.
+        String mailKey = RedisUtils.genMailCode();
+        redisTokenAndMailRepository.opsForValue().set(mailKey, code, Duration.ofMinutes(RedisUtils.mailTimeoutMinute));
+        userInfo.setValidMailKey(mailKey);
         return userInfo.getId();
     }
 
@@ -87,7 +94,7 @@ public class UserRepository {
     }
 
     public String refreshToken(String at) {
-        return redisTokenRepository.opsForValue().get(at);
+        return redisTokenAndMailRepository.opsForValue().get(RedisDataType.TOKEN.getValue() + at);
     }
 
     public Users findById(Long id) {
@@ -96,5 +103,19 @@ public class UserRepository {
 
     public boolean existsByNick(String nick) {
         return userJpaRepository.existsByNick(nick);
+    }
+
+    public boolean checkMailCode(String validMailKey, String code) {
+        String findCode = redisTokenAndMailRepository.opsForValue().get(validMailKey);
+        if (findCode == null) throw new ClientException(ExceptionCause.RETRY_SIGN_UP);
+        return findCode.equals(code);
+    }
+
+    public void deleteCache(String key) {
+        redisUserRepository.deleteById(key);
+    }
+
+    public void delete(Users findUser) {
+        userJpaRepository.delete(findUser);
     }
 }

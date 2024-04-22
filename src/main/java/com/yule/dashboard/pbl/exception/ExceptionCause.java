@@ -16,7 +16,12 @@ public enum ExceptionCause {
     RETRY_SIGN_UP(491, "need to retry sign up"),
     TOKEN_IS_EXPIRED(490, "token is expired"),
     PRIMARY_KEY_IS_NOT_VALID(489, "primary key is not valid check again"),
-    CAN_NOT_BE_ALL_NULL(488, "can not be null all arguments")
+    CAN_NOT_BE_ALL_NULL(488, "can not be null all arguments"),
+    PW_LENGTH_ERROR(487, "password legnth error"),
+    ID_LENGTH_ERROR(486, "id legnth error"),
+    NICK_LENGTH_ERROR(485, "nick legnth error"),
+    REQUEST_VALUE_IS_NOT_VALID(484, "request value is not valid")
+
     ;
     private final int code;
     private final String msg;

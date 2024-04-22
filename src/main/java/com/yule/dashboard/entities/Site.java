@@ -13,7 +13,7 @@ import lombok.*;
 @AllArgsConstructor
 @Entity
 @DiscriminatorValue("site")
-public class Site extends Data{
+public class Site extends Data {
     @Enumerated
     private SiteType site;
 }

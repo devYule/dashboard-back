@@ -24,11 +24,5 @@ public class UserQueryRepository {
                 .fetch();
     }
 
-    public int cntByMail(String mail) {
-        Long cnt = query.select(users.count())
-                .from(users)
-                .where(users.mail.eq(mail))
-                .fetchOne();
-        return cnt == null ? 0 : cnt.intValue();
-    }
+
 }

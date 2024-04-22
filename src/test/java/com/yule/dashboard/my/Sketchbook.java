@@ -22,7 +22,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 
 @Transactional
 @SpringBootTest
@@ -111,5 +114,17 @@ public class Sketchbook {
     @Transactional
     void nickExistsTest() {
         System.out.println("userJpaRepository.existsByNickAndState(user.getNick(), BaseState.ACTIVATED) = " + userJpaRepository.existsByNick(user.getNick()));
+    }
+
+    @Test
+    void codeLengthTest() {
+        String format = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS").format(LocalDateTime.now());
+        System.out.println(format);
+
+        String uuid = UUID.randomUUID().toString();
+        uuid = uuid.substring(uuid.indexOf("-"), uuid.indexOf("-") + 8);
+        String made = format + uuid;
+        System.out.println("made = " + made);
+
     }
 }

@@ -38,7 +38,7 @@ public class UserService {
     private final MailAuthenticationUtils mailAuthenticationUtils;
     private final SecurityFacade facade;
 
-    // 탈퇴: history 에 저장 ( em 으로 json 화 ) , Users 테이블에는 모두 null 로 변경, state 비활성화로 변경.
+    // 탈퇴: history 에 저장 ( em 으로 json 화 ) , Users 테이블에는 데이터 삭제
 
     public RedisKeyData checkId(CheckIdData loginId) {
         Users user = userRepository.findByLoginId(loginId.loginId());
@@ -104,14 +104,18 @@ public class UserService {
     }
 
     public RedisKeyData mailInfo(SignupMailInfoData data) {
-        if (userRepository.cntByMail(data.mail()) == 1) throw new ClientException(ExceptionCause.MAIL_IS_ALREADY_EXISTS);
+        if (userRepository.existsByMail(data.mail())) throw new ClientException(ExceptionCause.MAIL_IS_ALREADY_EXISTS);
+
         return new RedisKeyData(userRepository.saveMailCode(data.key(), mailAuthenticationUtils.sendAuthMail(data.mail())));
 
     }
 
     public LoginSuccessData mailCheck(SignupMailCheckData data) {
         RedisBaseUserInfoEntity cacheUser = userRepository.findByKey(data.key());
-        if (!cacheUser.getCode().equals(data.code())) throw new ClientException(ExceptionCause.AUTH_CODE_IS_NOT_MATCHES);
+        if (userRepository.checkMailCode(cacheUser.getValidMailKey(), data.code())) {
+            throw new ClientException(ExceptionCause.AUTH_CODE_IS_NOT_MATCHES);
+        }
+
         Users saveUser = userRepository.save(Users.builder()
                 .loginId(cacheUser.getLoginId())
                 .pw(cacheUser.getPw())
@@ -120,6 +124,8 @@ public class UserService {
                 .searchbar(SearchbarStyle.LINE)
                 .pic("default")
                 .build());
+
+        userRepository.deleteCache(data.key());
         return new LoginSuccessData(genAndSaveToken(saveUser.getId()), new ArrayList<>());
     }
 

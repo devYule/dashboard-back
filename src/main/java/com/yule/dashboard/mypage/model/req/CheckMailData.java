@@ -1,9 +1,9 @@
-package com.yule.dashboard.user.model.data.req;
+package com.yule.dashboard.mypage.model.req;
 
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
 
-public record SignupMailCheckData(
+public record CheckMailData(
         @NotBlank
         String key,
         @NotBlank

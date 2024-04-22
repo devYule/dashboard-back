@@ -20,7 +20,7 @@ public class RedisConfig {
     public RedisConnectionFactory redisConnectionFactory() {
         return new LettuceConnectionFactory(redisProperties.getHost(), redisProperties.getPort());
     }
-    @Bean("TokenHolder")
+    @Bean("TokenAndMailHolder")
     public RedisTemplate<String, String> redisTemplate() {
         RedisTemplate<String, String> redis = new RedisTemplate<>();
         redis.setConnectionFactory(redisConnectionFactory());

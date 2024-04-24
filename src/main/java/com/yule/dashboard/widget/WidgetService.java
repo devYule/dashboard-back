@@ -6,6 +6,7 @@ import com.yule.dashboard.entities.embeddable.UrlPath;
 import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.entities.enums.TrueOrFalse;
 import com.yule.dashboard.entities.enums.WidgetSize;
+import com.yule.dashboard.entities.enums.WidgetType;
 import com.yule.dashboard.pbl.BaseResponse;
 import com.yule.dashboard.pbl.security.SecurityFacade;
 import com.yule.dashboard.pbl.utils.LogicUtils;
@@ -15,6 +16,7 @@ import com.yule.dashboard.widget.model.data.req.WidgetPatchData;
 import com.yule.dashboard.widget.model.data.resp.WidgetData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -29,7 +31,8 @@ public class WidgetService {
     public BaseResponse addWidget(WidgetAddData data) {
         Users findUser = userRepository.findById(facade.getId());
         Widget widget = new Widget(data.order(), WidgetSize.getByValue(data.width()), WidgetSize.getByValue(data.height()),
-                new UrlPath(data.url()), TrueOrFalse.getByValue(data.isShown()));
+                new UrlPath(data.url()), TrueOrFalse.getByValue(data.isShown()), data.type() == 0 ? WidgetType.BOOKMARK :
+                WidgetType.UTILS);
         widget.setUser(findUser);
 
         return BaseResponse.builder().value(widgetRepository.save(widget).getId()).build();
@@ -60,6 +63,7 @@ public class WidgetService {
                 ).getId()).build();
     }
 
+    @Transactional
     public BaseResponse removeWidget(Long id) {
 
         Widget findWidget = widgetRepository.findByIdAndUserIdAndState(id, facade.getId(), BaseState.ACTIVATED);
@@ -67,6 +71,7 @@ public class WidgetService {
         return BaseResponse.builder().value(findWidget.getId()).build();
     }
 
+    @Transactional
     public BaseResponse removeAllWidget() {
         List<Widget> findWidgets = widgetRepository.findByUserIdAndState(facade.getId(), BaseState.ACTIVATED);
         findWidgets.forEach(w -> w.setState(BaseState.DEACTIVATED));

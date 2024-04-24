@@ -1,16 +1,19 @@
 package com.yule.dashboard.redis.utils;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
-
-public abstract class RedisUtils {
+@Component
+@Getter
+public class RedisUtils {
 
     private static final String pattern = "yyyyMMddHHmmssSSSSSS";
-    @Value("${times.timeout.mail-minute}")
-    public static long mailTimeoutMinute;
+    @Value("${times.timeout.mail-millis}")
+    private long mailTimeoutMillis;
 
     public static String genMailCode() {
         String format = DateTimeFormatter.ofPattern(pattern).format(LocalDateTime.now());

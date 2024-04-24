@@ -10,7 +10,7 @@ import org.springframework.data.redis.core.RedisHash;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@RedisHash(value = "base", timeToLive = 600)
+@RedisHash(value = "base", timeToLive = 600L)
 public class RedisBaseUserInfoEntity {
     @Id
     private String id;

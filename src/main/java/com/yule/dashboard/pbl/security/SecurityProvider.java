@@ -2,6 +2,8 @@ package com.yule.dashboard.pbl.security;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yule.dashboard.pbl.exception.ClientException;
+import com.yule.dashboard.pbl.exception.ExceptionCause;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -62,7 +64,6 @@ public class SecurityProvider {
     }
 
 
-
     /* --- extract --- */
     public String getTokenFromHeader(HttpServletRequest request) {
         String auth = request.getHeader(properties.getJwt().getHeader());
@@ -75,15 +76,12 @@ public class SecurityProvider {
 
     /* --- check is validated Token --- */
     private Claims getAllClaims(String token) {
-        try {
-            return Jwts.parser()
-                    .verifyWith(spec)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-        } catch (ExpiredJwtException e) {
-            throw new RuntimeException(e);
-        }
+        return Jwts.parser()
+                .verifyWith(spec)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
     }
 
     /* --- check is validated Token --- */

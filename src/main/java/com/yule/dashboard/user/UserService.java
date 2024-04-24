@@ -64,19 +64,19 @@ public class UserService {
         String at = genAndSaveToken(findInfo.getPk());
 
         // get widgets
-        List<WidgetVo> widgetVos = userRepository.getAllWidgets(findInfo.getPk(), BaseState.ACTIVATED, 1)
-                .stream()
-                .map(w -> WidgetVo.builder()
-                        .id(w.getId())
-                        .order(w.getOrder())
-                        .width(w.getWidth().getValue())
-                        .height(w.getHeight().getValue())
-                        .url(w.getUrl().getUrl())
-                        .isShown(w.getIsShown().getValue())
-                        .build())
-                .toList();
+//        List<WidgetVo> widgetVos = userRepository.getAllWidgets(findInfo.getPk(), BaseState.ACTIVATED, 1)
+//                .stream()
+//                .map(w -> WidgetVo.builder()
+//                        .id(w.getId())
+//                        .order(w.getOrder())
+//                        .width(w.getWidth().getValue())
+//                        .height(w.getHeight().getValue())
+//                        .url(w.getUrl().getUrl())
+//                        .isShown(w.getIsShown().getValue())
+//                        .build())
+//                .toList();
 
-        return new LoginSuccessData(at, widgetVos);
+        return new LoginSuccessData(at);
     }
 
 
@@ -88,8 +88,9 @@ public class UserService {
 
         try {
 
-            if (findUsers.get(1).getLoginId().equals(data.loginId()))
+            if (findUsers.get(0).getLoginId().equals(data.loginId())) {
                 throw new ClientException(ExceptionCause.ID_IS_ALREADY_EXISTS);
+            }
             throw new ClientException(ExceptionCause.NICK_IS_ALREADY_EXISTS);
 
         } catch (IndexOutOfBoundsException ignore) {
@@ -105,14 +106,19 @@ public class UserService {
 
     public RedisKeyData mailInfo(SignupMailInfoData data) {
         if (userRepository.existsByMail(data.mail())) throw new ClientException(ExceptionCause.MAIL_IS_ALREADY_EXISTS);
+        String savedMailKey = userRepository.saveMailCode(mailAuthenticationUtils.sendAuthMail(data.mail()));
+        RedisBaseUserInfoEntity userInfo = userRepository.findByKey(data.key());
+        userInfo.setValidMailKey(savedMailKey);
+        userInfo.setMail(data.mail());
+        userRepository.save(userInfo);
 
-        return new RedisKeyData(userRepository.saveMailCode(data.key(), mailAuthenticationUtils.sendAuthMail(data.mail())));
+        return new RedisKeyData(data.key());
 
     }
 
     public LoginSuccessData mailCheck(SignupMailCheckData data) {
         RedisBaseUserInfoEntity cacheUser = userRepository.findByKey(data.key());
-        if (userRepository.checkMailCode(cacheUser.getValidMailKey(), data.code())) {
+        if (!userRepository.checkMailCode(cacheUser.getValidMailKey(), data.code())) {
             throw new ClientException(ExceptionCause.AUTH_CODE_IS_NOT_MATCHES);
         }
 
@@ -126,7 +132,7 @@ public class UserService {
                 .build());
 
         userRepository.deleteCache(data.key());
-        return new LoginSuccessData(genAndSaveToken(saveUser.getId()), new ArrayList<>());
+        return new LoginSuccessData(genAndSaveToken(saveUser.getId()));
     }
 
     public AccessTokenData refreshToken(HttpServletRequest request) {

@@ -25,13 +25,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
 
                 .authorizeHttpRequests(auth -> auth.requestMatchers(
-                                        "/paths",
-                                        "/paths",
-                                        "/paths"
+                        "/api/mypage"
                                 ).authenticated()
-                                .requestMatchers(HttpMethod.GET, "/paths").authenticated()
-                                .requestMatchers("/path").hasAnyRole("ADMIN")
-                                .requestMatchers("/path", "/path").hasAnyRole("USER")
                                 .anyRequest().permitAll()
                 )
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)

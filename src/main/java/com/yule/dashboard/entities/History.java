@@ -25,7 +25,7 @@ public class History extends CreatedAt {
     @JoinColumn(name = "prev_id")
     private History prev;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private HistoryType type;
 
     @Column(name = "_value")

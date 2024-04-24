@@ -3,8 +3,10 @@ package com.yule.dashboard.entities;
 import com.yule.dashboard.entities.embeddable.UrlPath;
 import com.yule.dashboard.entities.enums.TrueOrFalse;
 import com.yule.dashboard.entities.enums.WidgetSize;
+import com.yule.dashboard.entities.enums.WidgetType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Setter
@@ -18,14 +20,16 @@ public class Widget extends Data {
 
     @Column(name = "_order")
     private int order;
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private WidgetSize width;
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private WidgetSize height;
     @Embedded
     private UrlPath url;
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private TrueOrFalse isShown;
+    @Enumerated(EnumType.STRING)
+    private WidgetType type = WidgetType.BOOKMARK;
 
     public Widget setIfNotNullData(
             Integer order,

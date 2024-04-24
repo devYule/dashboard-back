@@ -4,8 +4,10 @@ import com.yule.dashboard.entities.superclasses.BaseAt;
 import com.yule.dashboard.entities.enums.BaseState;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
+
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Setter
@@ -21,10 +23,10 @@ public class Data extends BaseAt {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Users user;
 
-    @Enumerated
-    @ColumnDefault("1")
-    private BaseState state;
+    @Enumerated(EnumType.STRING)
+    private BaseState state = BaseState.ACTIVATED;
 
 }

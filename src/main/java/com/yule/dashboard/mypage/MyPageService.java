@@ -7,10 +7,7 @@ import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.entities.enums.HistoryType;
 import com.yule.dashboard.entities.enums.SiteType;
 import com.yule.dashboard.mypage.model.MailCheckInfo;
-import com.yule.dashboard.mypage.model.req.SiteData;
-import com.yule.dashboard.mypage.model.req.ChangeMailData;
-import com.yule.dashboard.mypage.model.req.ChangeNickData;
-import com.yule.dashboard.mypage.model.req.CheckMailData;
+import com.yule.dashboard.mypage.model.req.*;
 import com.yule.dashboard.mypage.model.resp.ChangeMailKeyData;
 import com.yule.dashboard.mypage.model.resp.ChangeProfPicData;
 import com.yule.dashboard.pbl.BaseResponse;
@@ -23,8 +20,11 @@ import com.yule.dashboard.pbl.utils.enums.FileKind;
 import com.yule.dashboard.pbl.utils.enums.FileType;
 import com.yule.dashboard.user.UserRepository;
 import com.yule.dashboard.user.model.data.res.CheckPwData;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,36 +33,43 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MyPageService {
     private final HistoryRepository historyRepository;
     private final MyPageRepository myPageRepository;
     private final UserRepository userRepository;
     private final SiteRepository siteRepository;
     private final SecurityFacade facade;
+    private final FileUtils fileUtils;
+    private final PasswordEncoder encoder;
 
 
     @Transactional
     public ChangeProfPicData changeProfPic(MultipartFile pic) {
         Long id = facade.getId();
         Users findUser = userRepository.findById(id);
-        FileUtils.FileSaveResult saveResult = new FileUtils(FileCategory.USER, FileType.PIC, id).save(pic, FileKind.PROFILE_PIC);
+        FileUtils.FileSaveResult saveResult = fileUtils.save(pic, FileKind.PROFILE_PIC, FileCategory.USER, FileType.PIC, id);
         if (saveResult.movedPath() == null) {
             // 이 로직을 수행한다는 것은 프로필사진을 등록한적이 없다 == 회원가입 후 첫 프로필사진 변경이다.
             // 유저의 pic 에 path 를 savePath 로 변경해주어야 한다.
-            findUser.setPic(saveResult.savedPath());
             historyRepository.saveHistory(findUser, HistoryType.PIC, null);
         }
         if (saveResult.movedPath() != null) {
             // history 에 사진 변경 이력 저장
             // 유저의 pic 의 path 는 이미 savePath 로 저장되어 있다.
-            History findPrevHistory = historyRepository.findFirstByUserAndType(findUser, HistoryType.PIC,
-                    Sort.by(Sort.Direction.DESC, "id"));
-            historyRepository.saveHistory(findUser, findPrevHistory, HistoryType.PIC, saveResult.movedPath());
-
+            savePicHistory(findUser, saveResult);
         }
+        findUser.setPic(saveResult.savedPath());
         return new ChangeProfPicData(saveResult.savedPath());
     }
 
+
+    @Transactional
+    public BaseResponse removeProfPic() {
+        Users findUser = userRepository.findById(facade.getId());
+        savePicHistory(findUser, fileUtils.remove(findUser.getPic()));
+        return new BaseResponse();
+    }
 
     @Transactional
     public BaseResponse changeNick(ChangeNickData data) {
@@ -112,12 +119,13 @@ public class MyPageService {
     }
 
     @Transactional
-    public BaseResponse changePw(CheckPwData data) {
+    public BaseResponse changePw(ChangePwData data) {
         Users findUser = userRepository.findById(facade.getId());
-        String prevPw = findUser.getPw();
-        findUser.setPw(data.pw());
+        if (!encoder.matches(data.prevPw(), findUser.getPw())) throw new ClientException(ExceptionCause.PW_NOT_MATCHES);
+        findUser.setPw(encoder.encode(data.pw()));
 
-        historyRepository.saveHistory(findUser, historyRepository.findPrevHistory(findUser, HistoryType.PW), HistoryType.PW, prevPw);
+        historyRepository.saveHistory(findUser, historyRepository.findPrevHistory(findUser, HistoryType.PW), HistoryType.PW,
+                null);
 
         return new BaseResponse();
     }
@@ -125,8 +133,17 @@ public class MyPageService {
     @Transactional
     public BaseResponse withDraw() {
         Users findUser = userRepository.findById(facade.getId());
-        userRepository.delete(findUser);
 
+        // 북마크 히스토리 저장
+
+        // 사이트 히스토리 저장
+
+        // 위젯 히스토리 저장
+
+
+
+
+        userRepository.delete(findUser);
         historyRepository.saveHistory(findUser, HistoryType.WITHDRAW);
         return new BaseResponse();
     }
@@ -148,6 +165,8 @@ public class MyPageService {
         try {
             if (findSite == null) {
                 Site saveSite = new Site(SiteType.getByValue(data.site()));
+                saveSite.setState(BaseState.ACTIVATED);
+                saveSite.setUser(findUser);
                 return new BaseResponse((long) siteRepository.save(saveSite).getSite().getValue());
             }
             findSite.setState(BaseState.ACTIVATED);
@@ -159,13 +178,44 @@ public class MyPageService {
     }
 
     @Transactional
-    public BaseResponse removeSite(SiteData data) {
+    public BaseResponse removeSite(int siteId) {
         Users findUser = userRepository.findById(facade.getId());
-        Site findSite = siteRepository.findByUserAndStateAndSite(findUser, BaseState.ACTIVATED, SiteType.getByValue(data.site()));
+        Site findSite = siteRepository.findByUserAndStateAndSite(findUser, BaseState.ACTIVATED, SiteType.getByValue(siteId));
         if (findSite == null) throw new ClientException(ExceptionCause.PRIMARY_KEY_IS_NOT_VALID);
         findSite.setState(BaseState.DEACTIVATED);
         historyRepository.saveHistory(findUser, historyRepository.findPrevHistory(findUser, HistoryType.SITE), HistoryType.SITE,
-                "remove:" + SiteType.getByValue(data.site()).name());
+                "remove:" + SiteType.getByValue(siteId).name());
         return new BaseResponse((long) findSite.getSite().getValue());
     }
+
+    @Transactional
+    public GetAllUserInfoData getAllUserInfoData() {
+        Users findUser = userRepository.findById(facade.getId());
+        List<Site> findSties = siteRepository.findByUserIdAndState(facade.getId(), BaseState.ACTIVATED);
+
+        return new GetAllUserInfoData(
+                findUser.getPic(), findUser.getNick(), findUser.getMail(),
+                findSties.stream().map(s -> s.getSite().getValue()).toList()
+        );
+
+//        log.info("sites: {}", findUser.getSites().toString());
+//        return new GetAllUserInfoData(
+//                findUser.getPic(), findUser.getNick(), findUser.getMail(),
+//                findUser.getSites().stream().map(s -> s.getSite().getValue()).toList()
+//        );
+    }
+
+    /* --- extracted methods --- */
+
+    /**
+     * 사진 history 저장용 호출 위임 메소드
+     */
+    private void savePicHistory(Users findUser, FileUtils.FileSaveResult saveResult) {
+        History findPrevHistory = historyRepository.findFirstByUserAndType(findUser, HistoryType.PIC,
+                Sort.by(Sort.Direction.DESC, "id"));
+        // request saveHistory
+        historyRepository.saveHistory(findUser, findPrevHistory, HistoryType.PIC, saveResult.movedPath());
+    }
+
+
 }

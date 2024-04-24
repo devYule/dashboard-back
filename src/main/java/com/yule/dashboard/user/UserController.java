@@ -11,37 +11,38 @@ import com.yule.dashboard.user.model.data.res.RedisKeyData;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/user/api")
+@RequestMapping("/api/user")
 public class UserController {
     private final UserService userService;
 
     @PostMapping("/id")
-    public RedisKeyData checkId(@RequestBody CheckIdData loginId) {
+    public RedisKeyData checkId(@Validated @RequestBody CheckIdData loginId) {
         return userService.checkId(loginId);
     }
 
     @PostMapping("/pw")
-    public LoginSuccessData checkPw(@RequestBody CheckPwData data) {
+    public LoginSuccessData checkPw(@Validated @RequestBody CheckPwData data) {
         return userService.checkPw(data);
     }
 
     @PostMapping("/info")
-    public RedisKeyData signupInfo(@RequestBody SignupInfoData data) {
+    public RedisKeyData signupInfo(@Validated @RequestBody SignupInfoData data) {
         return userService.signupInfo(data);
     }
 
     @PostMapping("/mail")
-    public RedisKeyData mailInfo(@RequestBody SignupMailInfoData data) {
+    public RedisKeyData mailInfo(@Validated @RequestBody SignupMailInfoData data) {
         return userService.mailInfo(data);
     }
 
     @PostMapping("/mail/check")
-    public LoginSuccessData mailCheck(@RequestBody SignupMailCheckData data) {
+    public LoginSuccessData mailCheck(@Validated @RequestBody SignupMailCheckData data) {
         return userService.mailCheck(data);
     }
 

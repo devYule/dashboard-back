@@ -3,6 +3,7 @@ package com.yule.dashboard.widget.model.data.req;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import org.hibernate.validator.constraints.Range;
 
 public record WidgetAddData(
         @Min(1)
@@ -17,6 +18,8 @@ public record WidgetAddData(
         String url,
         @Min(0)
         @Max(1)
-        int isShown
+        int isShown,
+        @Range(min = 0, max = 1)
+        int type
 ) {
 }

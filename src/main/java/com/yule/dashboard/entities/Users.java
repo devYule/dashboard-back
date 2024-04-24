@@ -7,6 +7,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DialectOverride;
+import org.springframework.boot.context.properties.bind.DefaultValue;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -26,8 +30,11 @@ public class Users extends CreatedAt {
     private String nick;
     private String mail;
     private String pic;
-    @Enumerated
-    private SearchbarStyle searchbar;
+    @Enumerated(EnumType.STRING)
+    private SearchbarStyle searchbar = SearchbarStyle.LINE;
+
+//    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+//    private List<Site> sites = new ArrayList<>();
 
 
 }

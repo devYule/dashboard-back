@@ -3,6 +3,7 @@ package com.yule.dashboard.user;
 import com.yule.dashboard.entities.Users;
 import com.yule.dashboard.entities.Widget;
 import com.yule.dashboard.entities.enums.BaseState;
+import com.yule.dashboard.mypage.model.AllUserInfoVo;
 import com.yule.dashboard.pbl.exception.ClientException;
 import com.yule.dashboard.pbl.exception.ExceptionCause;
 import com.yule.dashboard.pbl.exception.ServerException;
@@ -15,9 +16,11 @@ import com.yule.dashboard.user.repositories.jparepo.UserJpaRepository;
 import com.yule.dashboard.user.repositories.queryrepo.UserQueryRepository;
 import com.yule.dashboard.widget.repositories.jparepo.WidgetJpaRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.List;
@@ -31,6 +34,7 @@ public class UserRepository {
 
     private final RedisTemplate<String, String> redisTokenAndMailRepository;
     private final SecurityProperties properties;
+    private final RedisUtils redisUtils;
 
     public UserRepository(
             UserJpaRepository userJpaRepository,
@@ -38,13 +42,15 @@ public class UserRepository {
             RedisUserRepository redisUserRepository,
             WidgetJpaRepository widgetJpaRepository,
             @Qualifier("TokenAndMailHolder") RedisTemplate<String, String> redisTokenAndMailRepository,
-            SecurityProperties properties) {
+            SecurityProperties properties,
+            RedisUtils redisUtils) {
         this.userJpaRepository = userJpaRepository;
         this.userQueryRepository = userQueryRepository;
         this.redisUserRepository = redisUserRepository;
         this.widgetJpaRepository = widgetJpaRepository;
         this.redisTokenAndMailRepository = redisTokenAndMailRepository;
         this.properties = properties;
+        this.redisUtils = redisUtils;
     }
 
     public Users findByLoginId(String userId) {
@@ -52,7 +58,11 @@ public class UserRepository {
     }
 
     public String save(RedisBaseUserInfoEntity userInfo) {
-        return redisUserRepository.save(userInfo).getId();
+        try {
+            return redisUserRepository.save(userInfo).getId();
+        } catch (RedisConnectionFailureException e) {
+            throw new ServerException();
+        }
     }
 
     public Users save(Users user) {
@@ -65,9 +75,9 @@ public class UserRepository {
         rep.set(RedisDataType.TOKEN.getValue() + at, rt, Duration.ofMillis(properties.getJwt().getRefreshTokenExpiry()));
     }
 
-    public List<Widget> getAllWidgets(Long id, BaseState state, int page) {
-        return widgetJpaRepository.findByUserIdAndStateOffsetPageLimit(id, state, page);
-    }
+//    public List<Widget> getAllWidgets(Long id, BaseState state, int page) {
+//        return widgetJpaRepository.findByUserIdAndStateOffsetPageLimit(id, state, page);
+//    }
 
     public List<Users> checkSignupInfo(String loginId, String nick) {
         return userQueryRepository.checkSignupInfo(loginId, nick);
@@ -78,15 +88,16 @@ public class UserRepository {
         return userJpaRepository.existsByMail(mail);
     }
 
-    public String saveMailCode(String key, String code) {
-        RedisBaseUserInfoEntity userInfo = redisUserRepository.findById(key).orElseThrow(() -> new ClientException(ExceptionCause.RETRY_SIGN_UP));
+    public String saveMailCode(String code) {
+
         // token and mail 에 key value 로 저장,
         // key 를 userInfo 에 저장.
         // key 에는 userInfo 키가 있고, code 는 사용자가 입력해야할 code 가 들어 있음.
         String mailKey = RedisUtils.genMailCode();
-        redisTokenAndMailRepository.opsForValue().set(mailKey, code, Duration.ofMinutes(RedisUtils.mailTimeoutMinute));
-        userInfo.setValidMailKey(mailKey);
-        return userInfo.getId();
+        long mailTimeoutMillis = redisUtils.getMailTimeoutMillis();
+        redisTokenAndMailRepository.opsForValue().set(mailKey, code, Duration.ofMillis(mailTimeoutMillis));
+
+        return mailKey;
     }
 
     public RedisBaseUserInfoEntity findByKey(String key) {
@@ -118,4 +129,8 @@ public class UserRepository {
     public void delete(Users findUser) {
         userJpaRepository.delete(findUser);
     }
+
+//    public Users findUserWithSitesById(Long id) {
+//        return userQueryRepository.findUserWithSitesById(id);
+//    }
 }

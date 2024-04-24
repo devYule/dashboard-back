@@ -2,7 +2,6 @@ package com.yule.dashboard.mypage;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yule.dashboard.entities.Site;
 import com.yule.dashboard.mypage.model.MailCheckInfo;
 import com.yule.dashboard.pbl.exception.ClientException;
 import com.yule.dashboard.pbl.exception.ExceptionCause;
@@ -15,7 +14,6 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
-import java.util.List;
 
 @Repository
 public class MyPageRepository {
@@ -23,13 +21,15 @@ public class MyPageRepository {
     private final RedisTemplate<String, String> redisTokenAndMailRepository;
     private final MailAuthenticationUtils mailAuthenticationUtils;
     private final ObjectMapper om;
+    private final RedisUtils redisUtils;
 
     public MyPageRepository(@Qualifier("TokenAndMailHolder") RedisTemplate<String, String> redisTokenAndMailRepository,
                             MailAuthenticationUtils mailAuthenticationUtils,
-                            ObjectMapper om) {
+                            ObjectMapper om, RedisUtils redisUtils) {
         this.redisTokenAndMailRepository = redisTokenAndMailRepository;
         this.mailAuthenticationUtils = mailAuthenticationUtils;
         this.om = om;
+        this.redisUtils = redisUtils;
     }
 
     public String saveMailCode(String mail) {
@@ -47,7 +47,7 @@ public class MyPageRepository {
             throw new ServerException();
         }
 
-        redisTokenAndMailRepository.opsForValue().set(key, stringify, Duration.ofMinutes(RedisUtils.mailTimeoutMinute));
+        redisTokenAndMailRepository.opsForValue().set(key, stringify, Duration.ofMillis(redisUtils.getMailTimeoutMillis()));
         return key;
     }
 

@@ -40,7 +40,7 @@ public class DriverPool {
     public synchronized ChromeDriver getNewDriver(ChromeDriver oldDriver) {
         drivers.remove(oldDriver);
         using.remove(oldDriver);
-        if(drivers.size() + using.size() == driverSize) throw new ServerException();
+        if (drivers.size() + using.size() == driverSize) throw new ServerException();
         ChromeDriver driver = new ChromeDriver();
         this.using.add(driver);
         return driver;
@@ -49,6 +49,7 @@ public class DriverPool {
     public ChromeDriver getDriver() {
         return getDriver(1);
     }
+
     public synchronized void returnDriver(ChromeDriver driver) {
         try {
             using.remove(driver);
@@ -65,6 +66,12 @@ public class DriverPool {
     private synchronized ChromeDriver getDriver(int retryCnt) {
         if (retryCnt == this.retryCount) throw new ServerException();
         try {
+            if (drivers.size() + using.size() < driverSize) {
+                int lacking = driverSize - (drivers.size() + using.size());
+                for (int i = 0; i < lacking; i++) {
+                    drivers.add(new ChromeDriver());
+                }
+            }
             ChromeDriver driver = drivers.get(0);
             using.add(driver);
             return driver;

@@ -28,6 +28,8 @@ public enum ExceptionCause {
     MUST_MOVE_TO_HOME(501, ExceptionMessages.MUST_MOVE_TO_HOME),
     FILE_IS_NOT_EXISTS(482, ExceptionMessages.FILE_IS_NOT_EXISTS),
     REQUEST_VALUE_RANGE_ERROR(481, ExceptionMessages.REQUEST_VALUE_RANGE_ERROR),
+    RETRY_SIGN_IN(480, ExceptionMessages.RETRY_SIGN_IN),
+    SITE_IS_EMPTY(479, ExceptionMessages.SITE_IS_EMPTY),
 
     ;
     private final int code;

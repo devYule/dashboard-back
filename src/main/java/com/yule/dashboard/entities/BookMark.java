@@ -1,6 +1,5 @@
 package com.yule.dashboard.entities;
 
-import com.yule.dashboard.entities.embeddable.UrlPath;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.*;
@@ -14,6 +13,6 @@ import lombok.*;
 @DiscriminatorValue("bookmark")
 public class BookMark extends Data {
     private String title;
-    private UrlPath url;
+    private String url;
     private String memo;
 }

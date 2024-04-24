@@ -9,7 +9,6 @@ import lombok.Getter;
 public class DeleteUserVo {
     private Long id;
     private String loginId;
-    private String pw;
     private String nick;
     private String mail;
     private String pic;

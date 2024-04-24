@@ -4,14 +4,17 @@ import com.yule.dashboard.entities.Users;
 import com.yule.dashboard.entities.enums.BaseState;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 
 public interface UserJpaRepository extends JpaRepository<Users, Long> {
-    Users findByLoginId(String loginId);
+    Users findByLoginIdAndState(String loginId, BaseState state);
 
 
+    Optional<Users> findByIdAndState(Long id, BaseState state);
 
-    boolean existsByNick(String nick);
+    boolean existsByNickAndState(String nick, BaseState state);
 
-    boolean existsByMail(String mail);
+    boolean existsByMailAndState(String mail, BaseState state);
 
 }

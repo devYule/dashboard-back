@@ -12,4 +12,5 @@ public interface BookmarkJpaRepository extends JpaRepository<BookMark, Long>, Bo
 
 
     BookMark findOneByIdAndState(Long id, BaseState baseState);
+
 }

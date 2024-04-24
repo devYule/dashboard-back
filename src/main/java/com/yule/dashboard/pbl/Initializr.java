@@ -2,7 +2,6 @@ package com.yule.dashboard.pbl;
 
 import com.yule.dashboard.entities.Users;
 import com.yule.dashboard.entities.Widget;
-import com.yule.dashboard.entities.embeddable.UrlPath;
 import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.entities.enums.TrueOrFalse;
 import com.yule.dashboard.entities.enums.WidgetSize;
@@ -12,6 +11,7 @@ import com.yule.dashboard.widget.WidgetRepository;
 import com.yule.dashboard.widget.repositories.jparepo.WidgetJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.remote.http.UrlPath;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
@@ -51,7 +51,7 @@ public class Initializr {
                     i + 1,
                     WidgetSize.getByValue(randomWidth),
                     WidgetSize.getByValue(randomHeight),
-                    new UrlPath("https://www.naver.com"),
+                    "https://www.naver.com",
                     TrueOrFalse.TRUE,
                     WidgetType.BOOKMARK);
             widget.setUser(user);

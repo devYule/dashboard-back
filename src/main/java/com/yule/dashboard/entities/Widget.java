@@ -1,12 +1,11 @@
 package com.yule.dashboard.entities;
 
-import com.yule.dashboard.entities.embeddable.UrlPath;
 import com.yule.dashboard.entities.enums.TrueOrFalse;
 import com.yule.dashboard.entities.enums.WidgetSize;
 import com.yule.dashboard.entities.enums.WidgetType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
+import org.openqa.selenium.remote.http.UrlPath;
 
 @Getter
 @Setter
@@ -24,8 +23,8 @@ public class Widget extends Data {
     private WidgetSize width;
     @Enumerated(EnumType.STRING)
     private WidgetSize height;
-    @Embedded
-    private UrlPath url;
+
+    private String url;
     @Enumerated(EnumType.STRING)
     private TrueOrFalse isShown;
     @Enumerated(EnumType.STRING)
@@ -48,7 +47,7 @@ public class Widget extends Data {
             this.height = WidgetSize.getByValue(height);
         }
         if (url != null) {
-            this.url = UrlPath.builder().url(url).build();
+            this.url = url;
         }
         if (isShown != null) {
             this.isShown = TrueOrFalse.getByValue(isShown);

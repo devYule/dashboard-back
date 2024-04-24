@@ -5,7 +5,6 @@ import com.yule.dashboard.entities.BookMark;
 import com.yule.dashboard.entities.History;
 import com.yule.dashboard.entities.Users;
 import com.yule.dashboard.entities.embeddable.UrlPath;
-import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.entities.enums.HistoryType;
 import com.yule.dashboard.mypage.repositories.jparepo.HistoryJpaRepository;
 import com.yule.dashboard.redis.entities.RedisBaseUserInfoEntity;
@@ -93,7 +92,7 @@ public class Sketchbook {
         for (BookMark findBookmark : findBookmarks) {
             System.out.println("findBookmark.getMemo() = " + findBookmark.getMemo());
         }
-        System.out.println("userJpaRepository.findByLoginIdAndState(saveUser.getLoginId(), BaseState.ACTIVATED) = " + userJpaRepository.findByLoginId(user.getLoginId()).getLoginId());
+        System.out.println("userJpaRepository.findByLoginIdAndState(saveUser.getLoginId(), BaseState.ACTIVATED) = " + userJpaRepository.findByLoginIdAndState(user.getLoginId()).getLoginId());
     }
 
     @Test
@@ -113,7 +112,7 @@ public class Sketchbook {
     @Test
     @Transactional
     void nickExistsTest() {
-        System.out.println("userJpaRepository.existsByNickAndState(user.getNick(), BaseState.ACTIVATED) = " + userJpaRepository.existsByNick(user.getNick()));
+        System.out.println("userJpaRepository.existsByNickAndState(user.getNick(), BaseState.ACTIVATED) = " + userJpaRepository.existsByNickAndState(user.getNick()));
     }
 
     @Test

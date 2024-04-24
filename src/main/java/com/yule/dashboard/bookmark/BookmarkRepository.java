@@ -30,4 +30,8 @@ public class BookmarkRepository {
         }
         return findBookmark;
     }
+
+    public List<String> findUrlByUrlPathIn(List<String> totalUrls) {
+        return bookmarkJpaRepository.findUrlByUrlPathIn(totalUrls);
+    }
 }

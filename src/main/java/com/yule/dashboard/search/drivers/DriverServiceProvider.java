@@ -33,6 +33,7 @@ public class DriverServiceProvider {
 
             List<NaverSiteInfo> result = new ArrayList<>();
 
+            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(100));
             // 지식, 인플루언서, 맛집, 카페 등
             List<WebElement> community = driver.findElements(By.xpath("//div[@class=\"detail_box\"]"));
             for (WebElement comm : community) {
@@ -123,13 +124,16 @@ public class DriverServiceProvider {
             long tryDurationStart = System.currentTimeMillis();
             while (!driver.findElements(By.xpath("//div[@id='search']")).isEmpty()) {
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
                 if (System.currentTimeMillis() - tryDurationStart > 10000) throw new RuntimeException();
             }
             List<WebElement> divs = driver.findElements(By.xpath("//div[@id='rso']/div"));
+
+            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(5));
+
             int size = divs.size();
             int lastIdx = size - 1;
             for (int i = 0; i < size; i++) {
@@ -168,10 +172,12 @@ public class DriverServiceProvider {
         try {
             driver = driverPool.getDriver();
             try {
-                driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-            } catch (NoSuchWindowException e) {
-                log.error(driver.getWindowHandle() + " is closed!!!\nso, create new tab!");
+                driver.get("data:"); // null check
+            } catch (NoSuchWindowException | NullPointerException e) {
                 driver = driverPool.getNewDriver(driver);
+
+            } finally {
+                driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
             }
             return func.apply(driver);
         } finally {

@@ -30,8 +30,13 @@ public class Users extends CreatedAt {
     private String nick;
     private String mail;
     private String pic;
+
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private SearchbarStyle searchbar = SearchbarStyle.LINE;
+
+    @Builder.Default
+    private BaseState state = BaseState.ACTIVATED;
 
 //    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
 //    private List<Site> sites = new ArrayList<>();

@@ -7,4 +7,5 @@ import java.util.List;
 public interface BookmarkQueryRepository {
 
 
+    List<String> findUrlByUrlPathIn(List<String> totalUrls);
 }

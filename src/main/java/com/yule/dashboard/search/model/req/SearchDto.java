@@ -1,18 +1,21 @@
 package com.yule.dashboard.search.model.req;
 
 import com.yule.dashboard.search.drivers.model.SiteCategories;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.List;
 
 @Builder
 @Getter
-public class SearchData{
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class SearchDto {
     private List<String> title;
     private String link;
     private List<String> content;
     private SiteCategories category;
     private String iconPath;
     private String subTitle;
+    private int isBookmarked;
 }

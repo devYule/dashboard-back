@@ -1,7 +1,5 @@
 package com.yule.dashboard.user.model.dto;
 
-import com.yule.dashboard.entities.embeddable.UrlPath;
-import com.yule.dashboard.entities.enums.WidgetSize;
 import lombok.Builder;
 import lombok.Getter;
 

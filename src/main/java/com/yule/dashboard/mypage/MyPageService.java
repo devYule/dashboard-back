@@ -1,11 +1,14 @@
 package com.yule.dashboard.mypage;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yule.dashboard.entities.History;
 import com.yule.dashboard.entities.Site;
 import com.yule.dashboard.entities.Users;
 import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.entities.enums.HistoryType;
 import com.yule.dashboard.entities.enums.SiteType;
+import com.yule.dashboard.mypage.model.DeleteUserVo;
 import com.yule.dashboard.mypage.model.MailCheckInfo;
 import com.yule.dashboard.mypage.model.req.*;
 import com.yule.dashboard.mypage.model.resp.ChangeMailKeyData;
@@ -13,14 +16,13 @@ import com.yule.dashboard.mypage.model.resp.ChangeProfPicData;
 import com.yule.dashboard.pbl.BaseResponse;
 import com.yule.dashboard.pbl.exception.ClientException;
 import com.yule.dashboard.pbl.exception.ExceptionCause;
+import com.yule.dashboard.pbl.exception.ServerException;
 import com.yule.dashboard.pbl.security.SecurityFacade;
 import com.yule.dashboard.pbl.utils.FileUtils;
 import com.yule.dashboard.pbl.utils.enums.FileCategory;
 import com.yule.dashboard.pbl.utils.enums.FileKind;
 import com.yule.dashboard.pbl.utils.enums.FileType;
 import com.yule.dashboard.user.UserRepository;
-import com.yule.dashboard.user.model.data.res.CheckPwData;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -42,6 +44,7 @@ public class MyPageService {
     private final SecurityFacade facade;
     private final FileUtils fileUtils;
     private final PasswordEncoder encoder;
+    private final ObjectMapper om;
 
 
     @Transactional
@@ -68,6 +71,7 @@ public class MyPageService {
     public BaseResponse removeProfPic() {
         Users findUser = userRepository.findById(facade.getId());
         savePicHistory(findUser, fileUtils.remove(findUser.getPic()));
+        findUser.setPic(null);
         return new BaseResponse();
     }
 
@@ -134,17 +138,26 @@ public class MyPageService {
     public BaseResponse withDraw() {
         Users findUser = userRepository.findById(facade.getId());
 
-        // 북마크 히스토리 저장
-
-        // 사이트 히스토리 저장
-
-        // 위젯 히스토리 저장
 
 
+        String stringify;
+        try {
+            stringify = om.writeValueAsString(new DeleteUserVo(findUser.getId(), findUser.getLoginId(), findUser.getNick(),
+                    findUser.getMail()
+                    , findUser.getPic(), findUser.getSearchbar()));
+        } catch (JsonProcessingException e) {
+            throw new ServerException(e);
+        }
 
+        historyRepository.saveHistory(findUser,
+                historyRepository.findPrevHistory(findUser, HistoryType.WITHDRAW), HistoryType.WITHDRAW,
+                stringify);
 
-        userRepository.delete(findUser);
-        historyRepository.saveHistory(findUser, HistoryType.WITHDRAW);
+        findUser.setState(BaseState.DEACTIVATED);
+        findUser.setLoginId(null);
+        findUser.setNick(null);
+        findUser.setMail(null);
+
         return new BaseResponse();
     }
 

@@ -1,19 +1,15 @@
 package com.yule.dashboard.user.repositories.queryrepo;
 
-import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.yule.dashboard.entities.QSite;
 import com.yule.dashboard.entities.QUsers;
 import com.yule.dashboard.entities.Users;
-import com.yule.dashboard.entities.enums.BaseState;
-import com.yule.dashboard.mypage.model.AllUserInfoVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import static com.yule.dashboard.entities.QSite.*;
 import static com.yule.dashboard.entities.QUsers.*;
+
 
 @Repository
 @RequiredArgsConstructor

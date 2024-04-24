@@ -1,9 +1,7 @@
 package com.yule.dashboard.user;
 
 import com.yule.dashboard.entities.Users;
-import com.yule.dashboard.entities.Widget;
 import com.yule.dashboard.entities.enums.BaseState;
-import com.yule.dashboard.mypage.model.AllUserInfoVo;
 import com.yule.dashboard.pbl.exception.ClientException;
 import com.yule.dashboard.pbl.exception.ExceptionCause;
 import com.yule.dashboard.pbl.exception.ServerException;
@@ -14,13 +12,11 @@ import com.yule.dashboard.redis.repository.RedisUserRepository;
 import com.yule.dashboard.redis.utils.RedisUtils;
 import com.yule.dashboard.user.repositories.jparepo.UserJpaRepository;
 import com.yule.dashboard.user.repositories.queryrepo.UserQueryRepository;
-import com.yule.dashboard.widget.repositories.jparepo.WidgetJpaRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.List;
@@ -30,7 +26,6 @@ public class UserRepository {
     private final UserJpaRepository userJpaRepository;
     private final UserQueryRepository userQueryRepository;
     private final RedisUserRepository redisUserRepository;
-    private final WidgetJpaRepository widgetJpaRepository;
 
     private final RedisTemplate<String, String> redisTokenAndMailRepository;
     private final SecurityProperties properties;
@@ -40,21 +35,19 @@ public class UserRepository {
             UserJpaRepository userJpaRepository,
             UserQueryRepository userQueryRepository,
             RedisUserRepository redisUserRepository,
-            WidgetJpaRepository widgetJpaRepository,
             @Qualifier("TokenAndMailHolder") RedisTemplate<String, String> redisTokenAndMailRepository,
             SecurityProperties properties,
             RedisUtils redisUtils) {
         this.userJpaRepository = userJpaRepository;
         this.userQueryRepository = userQueryRepository;
         this.redisUserRepository = redisUserRepository;
-        this.widgetJpaRepository = widgetJpaRepository;
         this.redisTokenAndMailRepository = redisTokenAndMailRepository;
         this.properties = properties;
         this.redisUtils = redisUtils;
     }
 
     public Users findByLoginId(String userId) {
-        return userJpaRepository.findByLoginId(userId);
+        return userJpaRepository.findByLoginIdAndState(userId, BaseState.ACTIVATED);
     }
 
     public String save(RedisBaseUserInfoEntity userInfo) {
@@ -85,7 +78,7 @@ public class UserRepository {
     }
 
     public boolean existsByMail(String mail) {
-        return userJpaRepository.existsByMail(mail);
+        return userJpaRepository.existsByMailAndState(mail, BaseState.ACTIVATED);
     }
 
     public String saveMailCode(String code) {
@@ -109,11 +102,11 @@ public class UserRepository {
     }
 
     public Users findById(Long id) {
-        return userJpaRepository.findById(id).orElseThrow(ServerException::new);
+        return userJpaRepository.findByIdAndState(id, BaseState.ACTIVATED).orElseThrow(ServerException::new);
     }
 
     public boolean existsByNick(String nick) {
-        return userJpaRepository.existsByNick(nick);
+        return userJpaRepository.existsByNickAndState(nick, BaseState.ACTIVATED);
     }
 
     public boolean checkMailCode(String validMailKey, String code) {
@@ -126,9 +119,7 @@ public class UserRepository {
         redisUserRepository.deleteById(key);
     }
 
-    public void delete(Users findUser) {
-        userJpaRepository.delete(findUser);
-    }
+
 
 //    public Users findUserWithSitesById(Long id) {
 //        return userQueryRepository.findUserWithSitesById(id);

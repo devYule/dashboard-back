@@ -3,6 +3,7 @@ package com.yule.dashboard.widget.model.data.resp;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import org.hibernate.validator.constraints.Length;
 
 public record WidgetData(
         Long id,
@@ -18,7 +19,11 @@ public record WidgetData(
         String url,
         @Min(0)
         @Max(1)
-        int isShown
-
+        int isShown,
+        @NotBlank
+        @Length(max = 10)
+        String title,
+        @Length(max = 50)
+        String memo
 ) {
 }

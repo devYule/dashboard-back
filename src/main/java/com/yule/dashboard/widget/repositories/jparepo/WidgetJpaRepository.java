@@ -1,5 +1,6 @@
 package com.yule.dashboard.widget.repositories.jparepo;
 
+import com.yule.dashboard.entities.BookMark;
 import com.yule.dashboard.entities.Widget;
 import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.widget.repositories.queryrepo.WidgetQueryRepository;
@@ -14,4 +15,6 @@ public interface WidgetJpaRepository extends JpaRepository<Widget, Long>, Widget
 
 
     List<Widget> findByUserIdAndState(Long id, BaseState baseState);
+
+    List<Widget> findByBookmarkAndState(BookMark bookmark, BaseState state);
 }

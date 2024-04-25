@@ -1,5 +1,6 @@
 package com.yule.dashboard.widget;
 
+import com.yule.dashboard.entities.BookMark;
 import com.yule.dashboard.entities.Widget;
 import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.pbl.exception.ClientException;
@@ -34,5 +35,9 @@ public class WidgetRepository {
 
     public List<Widget> findByUserIdAndState(Long id, BaseState baseState) {
         return widgetJpaRepository.findByUserIdAndState(id, baseState);
+    }
+
+    public List<Widget> findByBookMarkAndState(BookMark findBookmark, BaseState baseState) {
+        return widgetJpaRepository.findByBookmarkAndState(findBookmark, baseState);
     }
 }

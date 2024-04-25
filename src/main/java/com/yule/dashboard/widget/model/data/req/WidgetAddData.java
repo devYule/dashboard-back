@@ -3,6 +3,7 @@ package com.yule.dashboard.widget.model.data.req;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import org.checkerframework.checker.units.qual.min;
 import org.hibernate.validator.constraints.Range;
 
 public record WidgetAddData(
@@ -20,6 +21,8 @@ public record WidgetAddData(
         @Max(1)
         int isShown,
         @Range(min = 0, max = 1)
-        int type
+        int type,
+        @Min(1)
+        Long bookmarkId
 ) {
 }

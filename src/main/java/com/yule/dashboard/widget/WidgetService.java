@@ -1,5 +1,7 @@
 package com.yule.dashboard.widget;
 
+import com.yule.dashboard.bookmark.BookmarkRepository;
+import com.yule.dashboard.entities.BookMark;
 import com.yule.dashboard.entities.Users;
 import com.yule.dashboard.entities.Widget;
 import com.yule.dashboard.entities.enums.BaseState;
@@ -14,7 +16,6 @@ import com.yule.dashboard.widget.model.data.req.WidgetAddData;
 import com.yule.dashboard.widget.model.data.req.WidgetPatchData;
 import com.yule.dashboard.widget.model.data.resp.WidgetData;
 import lombok.RequiredArgsConstructor;
-import org.openqa.selenium.remote.http.UrlPath;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,19 +27,22 @@ public class WidgetService {
 
     private final WidgetRepository widgetRepository;
     private final UserRepository userRepository;
+    private final BookmarkRepository bookmarkRepository;
     private final SecurityFacade facade;
 
     public BaseResponse addWidget(WidgetAddData data) {
         Users findUser = userRepository.findById(facade.getId());
+        BookMark findBookmark = bookmarkRepository.findByIdAndStateAndUserId(data.bookmarkId(), findUser.getId());
         Widget widget = new Widget(data.order(), WidgetSize.getByValue(data.width()), WidgetSize.getByValue(data.height()),
                 data.url(), TrueOrFalse.getByValue(data.isShown()), data.type() == 0 ? WidgetType.BOOKMARK :
-                WidgetType.UTILS);
+                WidgetType.UTILS, data.type() == 0 ? findBookmark : null);
         widget.setUser(findUser);
 
         return BaseResponse.builder().value(widgetRepository.save(widget).getId()).build();
 
     }
 
+    @Transactional
     public List<WidgetData> getAllWidgets(int page) {
         return widgetRepository.findByUserIdAndStateOffsetPageLimit(facade.getId(), BaseState.ACTIVATED, page)
                 .stream()
@@ -46,7 +50,9 @@ public class WidgetService {
                         w.getId(), w.getOrder(), w.getWidth().getValue(),
                         w.getHeight().getValue(),
                         w.getUrl(),
-                        w.getIsShown().getValue())).toList();
+                        w.getIsShown().getValue(),
+                        w.getBookmark().getTitle(),
+                        w.getBookmark().getMemo())).toList();
     }
 
     public BaseResponse patchWidget(WidgetPatchData data) {

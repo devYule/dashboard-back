@@ -30,6 +30,10 @@ public class Widget extends Data {
     @Enumerated(EnumType.STRING)
     private WidgetType type = WidgetType.BOOKMARK;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bookmark_id")
+    private BookMark bookmark;
+
     public Widget setIfNotNullData(
             Integer order,
             Integer width,

@@ -20,7 +20,9 @@ public class UserSiteRank {
     @JoinColumn(name = "user_id")
     private Users user;
 
-    private SiteType site;
+//    private SiteType site;
+
+
 
     private long count;
 

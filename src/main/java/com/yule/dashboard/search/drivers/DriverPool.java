@@ -9,6 +9,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -23,8 +24,8 @@ public class DriverPool {
     public DriverPool(@Value("${driver-pool.size}") int driverSize,
                       @Value("${driver-pool.retry-count}") int retryCount,
                       @Value("${driver-pool.timeout-second}") int timeout) {
-        this.drivers = new ArrayList<>();
-        this.using = new ArrayList<>();
+        this.drivers = Collections.synchronizedList(new ArrayList<>());
+        this.using = Collections.synchronizedList(new ArrayList<>());
         this.driverSize = driverSize;
         this.retryCount = retryCount;
         this.timeout = timeout;
@@ -46,7 +47,7 @@ public class DriverPool {
         return driver;
     }
 
-    public ChromeDriver getDriver() {
+    public synchronized ChromeDriver getDriver() {
         return getDriver(1);
     }
 
@@ -74,6 +75,7 @@ public class DriverPool {
             }
             ChromeDriver driver = drivers.get(0);
             using.add(driver);
+            drivers.remove(driver);
             return driver;
         } catch (ArrayIndexOutOfBoundsException e) {
             log.warn("driver pool is empty !!!\nwait " + timeout + "seconds...");

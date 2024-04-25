@@ -1,10 +1,7 @@
 package com.yule.dashboard.entities;
 
 import com.yule.dashboard.entities.enums.SiteType;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
@@ -17,4 +14,7 @@ import lombok.*;
 public class Site extends Data {
     @Enumerated(EnumType.STRING)
     private SiteType site;
+    @OneToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "rank_id")
+    private UserSiteRank rank;
 }

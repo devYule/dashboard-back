@@ -4,7 +4,7 @@ import com.yule.dashboard.bookmark.repositories.jparepo.BookmarkJpaRepository;
 import com.yule.dashboard.entities.BookMark;
 import com.yule.dashboard.entities.History;
 import com.yule.dashboard.entities.Users;
-import com.yule.dashboard.entities.embeddable.UrlPath;
+import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.entities.enums.HistoryType;
 import com.yule.dashboard.mypage.repositories.jparepo.HistoryJpaRepository;
 import com.yule.dashboard.redis.entities.RedisBaseUserInfoEntity;
@@ -82,17 +82,17 @@ public class Sketchbook {
     @DisplayName("findByUserId check")
     void test2() {
 
-        BookMark bookMark = new BookMark("test", new UrlPath("etst"), "seta");
+        BookMark bookMark = new BookMark("test", "etst", "seta");
         bookMark.setUser(user);
         BookMark saveBookmark = bookmarkJpaRepository.save(bookMark);
         bookmarkJpaRepository.flush();
 
-        List<BookMark> findBookmarks = bookmarkJpaRepository.findByUserId(user.getId());
+        List<BookMark> findBookmarks = bookmarkJpaRepository.findByUserIdAndState(user.getId(), BaseState.ACTIVATED);
         System.out.println("findBookmarks.size() = " + findBookmarks.size());
         for (BookMark findBookmark : findBookmarks) {
             System.out.println("findBookmark.getMemo() = " + findBookmark.getMemo());
         }
-        System.out.println("userJpaRepository.findByLoginIdAndState(saveUser.getLoginId(), BaseState.ACTIVATED) = " + userJpaRepository.findByLoginIdAndState(user.getLoginId()).getLoginId());
+        System.out.println("userJpaRepository.findByLoginIdAndState(saveUser.getLoginId(), BaseState.ACTIVATED) = " + userJpaRepository.findByLoginIdAndState(user.getLoginId(), BaseState.ACTIVATED).getLoginId());
     }
 
     @Test
@@ -112,7 +112,7 @@ public class Sketchbook {
     @Test
     @Transactional
     void nickExistsTest() {
-        System.out.println("userJpaRepository.existsByNickAndState(user.getNick(), BaseState.ACTIVATED) = " + userJpaRepository.existsByNickAndState(user.getNick()));
+        System.out.println("userJpaRepository.existsByNickAndState(user.getNick(), BaseState.ACTIVATED) = " + userJpaRepository.existsByNickAndState(user.getNick(), BaseState.ACTIVATED));
     }
 
     @Test

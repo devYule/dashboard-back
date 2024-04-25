@@ -24,6 +24,10 @@ public class SiteRepository {
         return siteJpaRepository.findByUserAndStateAndSite(user, baseState, site);
     }
 
+    public Site findByUserIdAndStateAndSite(Long userId, BaseState baseState, SiteType site) {
+        return siteJpaRepository.findByUserIdAndStateAndSite(userId, baseState, site);
+    }
+
     public Site save(Site saveSite) {
         return siteJpaRepository.save(saveSite);
     }

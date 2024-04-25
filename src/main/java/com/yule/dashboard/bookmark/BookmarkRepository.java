@@ -6,6 +6,7 @@ import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.pbl.exception.ClientException;
 import com.yule.dashboard.pbl.exception.ExceptionCause;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,23 +16,23 @@ import java.util.List;
 public class BookmarkRepository {
     private final BookmarkJpaRepository bookmarkJpaRepository;
 
-    public List<BookMark> findByUserId(Long id) {
-        return bookmarkJpaRepository.findByUserId(id);
+    public List<BookMark> findByUserIdDesc(Long id) {
+        return bookmarkJpaRepository.findByUserIdAndState(id, BaseState.ACTIVATED, Sort.by(Sort.Direction.DESC, "id"));
     }
 
     public BookMark save(BookMark bookMark) {
         return bookmarkJpaRepository.save(bookMark);
     }
 
-    public BookMark findOneByIdAndState(Long id) {
-        BookMark findBookmark = bookmarkJpaRepository.findOneByIdAndState(id, BaseState.ACTIVATED);
+    public BookMark findByIdAndStateAndUserId(Long id, Long userId) {
+        BookMark findBookmark = bookmarkJpaRepository.findByIdAndStateAndUserId(id, BaseState.ACTIVATED, userId);
         if (findBookmark == null) {
             throw new ClientException(ExceptionCause.PRIMARY_KEY_IS_NOT_VALID);
         }
         return findBookmark;
     }
 
-    public List<String> findUrlByUrlPathIn(List<String> totalUrls) {
-        return bookmarkJpaRepository.findUrlByUrlPathIn(totalUrls);
+    public List<BookMark> findByUrlIn(List<String> totalUrls) {
+        return bookmarkJpaRepository.findByUrlIn(totalUrls);
     }
 }

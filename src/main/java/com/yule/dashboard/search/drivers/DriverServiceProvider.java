@@ -1,5 +1,6 @@
 package com.yule.dashboard.search.drivers;
 
+import com.yule.dashboard.pbl.exception.ServerException;
 import com.yule.dashboard.search.drivers.model.GoogleSiteInfo;
 import com.yule.dashboard.search.drivers.model.NaverSiteInfo;
 import com.yule.dashboard.search.drivers.model.SiteCategories;
@@ -13,7 +14,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -27,15 +27,22 @@ public class DriverServiceProvider {
 
     public List<NaverSiteInfo> naver(String query) {
         return doLogic(driver -> {
+            log.trace("do naver search");
             driver.get("https://www.naver.com");
             driver.findElement(By.xpath("//*[@id=\"query\"]")).sendKeys(query);
             driver.findElement(By.xpath("//button[@type=\"submit\"]")).click();
 
             List<NaverSiteInfo> result = new ArrayList<>();
 
-            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(100));
+            log.trace("base info is loaded");
             // 지식, 인플루언서, 맛집, 카페 등
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new ServerException(e);
+            }
             List<WebElement> community = driver.findElements(By.xpath("//div[@class=\"detail_box\"]"));
+            log.trace("base info loaded");
             for (WebElement comm : community) {
                 NaverSiteInfo site = new NaverSiteInfo();
                 result.add(site);
@@ -43,7 +50,7 @@ public class DriverServiceProvider {
                         ".//a[contains(@class, \"title_link\") or contains(@class, \"title\")]"));
                 WebElement contentEl = comm.findElement(
                         By.xpath(".//a[contains(@class, \"dsc_link\") or contains(@class, \"desc\")]"));
-                site.getTitle().add(titleEl.getText());
+                site.setTitle(titleEl.getText());
                 site.setLink(titleEl.getAttribute("href"));
                 site.getContent().add(contentEl.getText());
                 site.setCategory(SiteCategories.COMMUNITY);
@@ -57,6 +64,7 @@ public class DriverServiceProvider {
 
             }
             // 네이버 지식백과
+            log.trace("wiki loaded");
             List<WebElement> naverWiki = driver.findElements(By.xpath("//div[@class=\"nkindic_basic\"]"));
             for (WebElement wiki : naverWiki) {
                 NaverSiteInfo site = new NaverSiteInfo();
@@ -68,7 +76,7 @@ public class DriverServiceProvider {
                 } catch (NoSuchElementException ignore) {
                 }
                 WebElement contentEl = wiki.findElement(By.xpath(".//div[contains(@class, \"content_desc\")]/a"));
-                site.getTitle().add(titleEl.getText());
+                site.setTitle(titleEl.getText());
                 site.setLink(titleEl.getAttribute("href"));
                 if (subTitleEl != null) {
                     site.setSubTitle(subTitleEl.getText());
@@ -77,13 +85,14 @@ public class DriverServiceProvider {
                 site.setCategory(SiteCategories.INFO);
             }
             // 네이버 뉴스
+            log.trace("news loaded");
             List<WebElement> news = driver.findElements(By.xpath("//ul[@class=\"list_news\"]/li"));
             for (WebElement n : news) {
                 NaverSiteInfo site = new NaverSiteInfo();
                 result.add(site);
                 WebElement titleEl = n.findElement(By.xpath(".//a[contains(@class, \"news_tit\")]"));
                 WebElement contentEl = n.findElement(By.xpath(".//div[contains(@class, \"dsc_wrap\")]/a"));
-                site.getTitle().add(titleEl.getText());
+                site.setTitle(titleEl.getText());
                 site.setLink(titleEl.getAttribute("href"));
                 site.getContent().add(contentEl.getText());
                 site.setCategory(SiteCategories.NEWS);
@@ -95,6 +104,7 @@ public class DriverServiceProvider {
                 }
             }
             // 지식인
+            log.trace("kin loaded");
             List<WebElement> kins = driver.findElements(By.xpath("//ul[@class=\"lst_nkin\"]/li"));
             for (WebElement kin : kins) {
                 WebElement titleEl = kin.findElement(By.xpath(".//a[contains(@class, \"question_text\")]"));
@@ -102,9 +112,39 @@ public class DriverServiceProvider {
                 NaverSiteInfo site = new NaverSiteInfo();
                 result.add(site);
 
-                site.getTitle().add(titleEl.getText());
+                site.setTitle(titleEl.getText());
                 site.setLink(titleEl.getAttribute("href"));
                 site.getContent().add(contentEl.getText());
+
+            }
+            // 기타
+            log.trace("ect load");
+            List<WebElement> ects = driver.findElements(By.xpath("//div[contains(@class, \"total_wrap\")]"));
+
+            for (WebElement ect : ects) {
+                //div[contains(@class, "source_box")]/a/img : icon
+                //div[@class="total_tit"]/a : title & link
+                //div[contains(@class, "total_dsc")]/a : content
+                WebElement iconEl;
+                WebElement titleElAndLink;
+                List<WebElement> contentEl;
+                try {
+                    iconEl = ect.findElement(By.xpath(".//div[contains(@class, \"source_box\")]/a/img"));
+                    titleElAndLink = ect.findElement(By.xpath(".//div[@class=\"total_tit\"]/a"));
+                    contentEl = ect.findElements(By.xpath(".//div[contains(@class, \"total_dsc\")]/a"));
+                } catch (NoSuchElementException ignored) {
+                    log.trace("passed");
+                    continue;
+                }
+                NaverSiteInfo siteInfo = new NaverSiteInfo();
+                result.add(siteInfo);
+                siteInfo.setTitle(titleElAndLink.getText());
+                siteInfo.setLink(titleElAndLink.getAttribute("href"));
+                siteInfo.setCategory(SiteCategories.ECT);
+                siteInfo.setIconPath(iconEl.getAttribute("src"));
+                for (WebElement content : contentEl) {
+                    siteInfo.getContent().add(content.getText());
+                }
 
             }
 
@@ -114,52 +154,51 @@ public class DriverServiceProvider {
 
     public List<? extends SiteInfo> google(String query) {
         return doLogic(driver -> {
+            log.trace("do google search");
             driver.get("https://www.google.com");
 
             List<GoogleSiteInfo> result = new ArrayList<>();
 
-            WebElement element = driver.findElement(By.cssSelector("[name='q'"));
+            log.trace("google try to get q");
+            WebElement element = driver.findElement(By.cssSelector("[name='q']"));
+            log.trace("google get q");
             element.sendKeys(query);
             element.submit();
-            long tryDurationStart = System.currentTimeMillis();
-            while (!driver.findElements(By.xpath("//div[@id='search']")).isEmpty()) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                if (System.currentTimeMillis() - tryDurationStart > 10000) throw new RuntimeException();
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new ServerException(e);
             }
-            List<WebElement> divs = driver.findElements(By.xpath("//div[@id='rso']/div"));
+//            List<WebElement> divs = driver.findElements(By.xpath("//div[@id='rso']/div"));
+            List<WebElement> divs = driver.findElements(By.xpath("//div[@class='MjjYud']/div"));
+            log.trace("google get page search");
 
-            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(5));
-
-            int size = divs.size();
-            int lastIdx = size - 1;
-            for (int i = 0; i < size; i++) {
-                WebElement thisDiv = divs.get(i);
+            for (WebElement thisDiv : divs) {
                 try {
-                    if (i == lastIdx) {
-                        thisDiv = thisDiv.findElement(By.xpath("./div"));
-                    }
-                    //*[@id="rso"]/div[2]  /div/div/div[1]/div/div/span/a
-                    WebElement atag = thisDiv.findElement(By.xpath("./div/div/div[1]/div/div/span/a"));
 
-                    GoogleSiteInfo site = new GoogleSiteInfo();
-                    result.add(site);
-                    site.getTitle().add(atag.findElement(By.xpath("./h3")).getText());
-                    site.setLink(atag.getAttribute("href"));
-                    List<WebElement> children = thisDiv.findElements(By.xpath("./div/div/div"));
-                    int totalSize = children.size();
-                    int contentIdx = totalSize - 2;
-                    List<WebElement> spans = children.get(contentIdx).findElements(By.xpath("./div/span"));
-                    for (WebElement span : spans) {
-                        site.getContent().add(span.getText());
-                    }
-                    WebElement iconEl = atag.findElement(By.xpath("./div/div/span/div/img"));
-                    site.setIconPath(iconEl.getAttribute("src"));
+                    //div[@id='rso']/div : 전체
+                    //h3 : h3 ( title ) xx //div[@id='rso']/div//div[contains(@class, 'notranslate')] xx //*[contains(@class, 'LC20lb')]
+                    //h3/parent::a
+                    //span[text()] , .hasAttribute('class') 가 없는것 : content
+                    //div[@id='rso']/div//h3/parent::a//img : icon
 
-                } catch (NoSuchElementException ignore) {
+
+                    WebElement titleEl = thisDiv.findElement(By.xpath(".//h3"));
+                    WebElement linkEl = titleEl.findElement(By.xpath("./parent::a"));
+                    WebElement contentEl = thisDiv.findElement(By.xpath(".//div[contains(@style, '-webkit-line-clamp:2')]"));
+                    WebElement iconEl = linkEl.findElement(By.xpath(".//img"));
+                    GoogleSiteInfo resultObj = new GoogleSiteInfo();
+                    result.add(resultObj);
+
+                    resultObj.setTitle(titleEl.getText());
+                    resultObj.setLink(linkEl.getAttribute("href"));
+                    resultObj.getContent().add(contentEl.getText());
+
+
+                    resultObj.setIconPath(iconEl.getAttribute("src"));
+
+                } catch (NoSuchElementException ignored) {
+                    System.out.println("passed");
                 }
             }
             return result;
@@ -176,8 +215,6 @@ public class DriverServiceProvider {
             } catch (NoSuchWindowException | NullPointerException e) {
                 driver = driverPool.getNewDriver(driver);
 
-            } finally {
-                driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
             }
             return func.apply(driver);
         } finally {

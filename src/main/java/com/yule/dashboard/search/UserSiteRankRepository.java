@@ -1,5 +1,6 @@
 package com.yule.dashboard.search;
 
+import com.yule.dashboard.entities.UserSiteRank;
 import com.yule.dashboard.search.repositories.UserSiteRankJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -15,6 +16,10 @@ public class UserSiteRankRepository {
 
     public List<Integer> findSiteNumByUserId(Long id) {
         return userSiteRankJpaRepository.findByUserId(id, Sort.by(Sort.Direction.DESC, "count"))
-                .stream().map(r -> r.getSite().getValue()).toList();
+                .stream().mapToInt(r -> (int) r.getCount()).boxed().toList();
+    }
+
+    public UserSiteRank save(UserSiteRank rank) {
+        return userSiteRankJpaRepository.save(rank);
     }
 }

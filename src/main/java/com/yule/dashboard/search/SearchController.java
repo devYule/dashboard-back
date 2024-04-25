@@ -1,6 +1,6 @@
 package com.yule.dashboard.search;
 
-import com.yule.dashboard.search.model.req.SearchDto;
+import com.yule.dashboard.search.model.resp.SiteRespData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +14,7 @@ public class SearchController {
 
 
     @GetMapping
-    public List<List<SearchDto>> search(@RequestParam String query) {
+    public List<SiteRespData> search(@RequestParam String query) {
         return searchService.search(query);
     }
 

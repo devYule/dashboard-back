@@ -11,11 +11,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SearchDto {
-    private List<String> title;
+    private String title;
     private String link;
     private List<String> content;
     private SiteCategories category;
     private String iconPath;
     private String subTitle;
-    private int isBookmarked;
+    private long bookmarkId;
 }

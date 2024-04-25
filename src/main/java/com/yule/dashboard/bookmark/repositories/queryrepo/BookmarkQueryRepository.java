@@ -1,11 +1,9 @@
 package com.yule.dashboard.bookmark.repositories.queryrepo;
 
-import com.yule.dashboard.entities.BookMark;
-
 import java.util.List;
 
 public interface BookmarkQueryRepository {
 
 
-    List<String> findUrlByUrlPathIn(List<String> totalUrls);
+//    List<String> findByUrlPathIn(List<String> totalUrls);
 }

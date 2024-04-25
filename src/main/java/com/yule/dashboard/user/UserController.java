@@ -50,4 +50,11 @@ public class UserController {
     public AccessTokenData refreshToken(HttpServletRequest request) {
         return userService.refreshToken(request);
     }
+
+    @GetMapping("/rank")
+    public void plusRank(@RequestParam int id) {
+        if (id < 0 || id > 8) return;
+        userService.plusRank(id);
+
+    }
 }

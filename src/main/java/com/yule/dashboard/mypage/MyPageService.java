@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yule.dashboard.entities.History;
 import com.yule.dashboard.entities.Site;
+import com.yule.dashboard.entities.UserSiteRank;
 import com.yule.dashboard.entities.Users;
 import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.entities.enums.HistoryType;
@@ -22,6 +23,7 @@ import com.yule.dashboard.pbl.utils.FileUtils;
 import com.yule.dashboard.pbl.utils.enums.FileCategory;
 import com.yule.dashboard.pbl.utils.enums.FileKind;
 import com.yule.dashboard.pbl.utils.enums.FileType;
+import com.yule.dashboard.search.UserSiteRankRepository;
 import com.yule.dashboard.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +43,7 @@ public class MyPageService {
     private final MyPageRepository myPageRepository;
     private final UserRepository userRepository;
     private final SiteRepository siteRepository;
+    private final UserSiteRankRepository userSiteRankRepository;
     private final SecurityFacade facade;
     private final FileUtils fileUtils;
     private final PasswordEncoder encoder;
@@ -177,7 +180,10 @@ public class MyPageService {
                 siteRepository.findByUserAndStateAndSite(findUser, BaseState.DEACTIVATED, SiteType.getByValue(data.site()));
         try {
             if (findSite == null) {
-                Site saveSite = new Site(SiteType.getByValue(data.site()));
+                UserSiteRank rank = UserSiteRank.builder()
+                        .user(findUser)
+                        .build();
+                Site saveSite = new Site(SiteType.getByValue(data.site()), rank);
                 saveSite.setState(BaseState.ACTIVATED);
                 saveSite.setUser(findUser);
                 return new BaseResponse((long) siteRepository.save(saveSite).getSite().getValue());

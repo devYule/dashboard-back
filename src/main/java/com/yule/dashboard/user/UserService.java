@@ -1,8 +1,12 @@
 package com.yule.dashboard.user;
 
+import com.yule.dashboard.entities.Site;
+import com.yule.dashboard.entities.UserSiteRank;
 import com.yule.dashboard.entities.Users;
 import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.entities.enums.SearchbarStyle;
+import com.yule.dashboard.entities.enums.SiteType;
+import com.yule.dashboard.mypage.SiteRepository;
 import com.yule.dashboard.pbl.exception.ClientException;
 import com.yule.dashboard.pbl.exception.ExceptionCause;
 import com.yule.dashboard.pbl.security.SecurityFacade;
@@ -10,6 +14,7 @@ import com.yule.dashboard.pbl.security.SecurityPrincipal;
 import com.yule.dashboard.pbl.security.SecurityProvider;
 import com.yule.dashboard.pbl.utils.MailAuthenticationUtils;
 import com.yule.dashboard.redis.entities.RedisBaseUserInfoEntity;
+import com.yule.dashboard.search.UserSiteRankRepository;
 import com.yule.dashboard.user.model.data.req.LoginSuccessData;
 import com.yule.dashboard.user.model.data.req.SignupInfoData;
 import com.yule.dashboard.user.model.data.req.SignupMailCheckData;
@@ -33,6 +38,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final SiteRepository siteRepository;
     private final PasswordEncoder passwordEncoder;
     private final SecurityProvider provider;
     private final MailAuthenticationUtils mailAuthenticationUtils;
@@ -161,4 +167,10 @@ public class UserService {
     }
 
 
+    @Transactional
+    public void plusRank(int siteIdentity) {
+        Site findSite = siteRepository.findByUserIdAndStateAndSite(facade.getId(), BaseState.ACTIVATED, SiteType.getByValue(siteIdentity));
+        UserSiteRank rank = findSite.getRank();
+        rank.setCount(rank.getCount() + 1);
+    }
 }

@@ -44,7 +44,7 @@ public class WidgetService {
 
     @Transactional
     public List<WidgetData> getAllWidgets(int page) {
-        return widgetRepository.findByUserIdAndStateOffsetPageLimit(facade.getId(), BaseState.ACTIVATED, page)
+        return widgetRepository.findByUserIdAndStateOffsetPageLimitDesc(facade.getId(), BaseState.ACTIVATED, page)
                 .stream()
                 .map(w -> new WidgetData(
                         w.getId(), w.getOrder(), w.getWidth().getValue(),

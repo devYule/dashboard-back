@@ -22,11 +22,12 @@ public class WidgetQueryRepositoryImpl implements WidgetQueryRepository {
     private int widgetLimit;
 
     @Override
-    public List<Widget> findByUserIdAndStateOffsetPageLimit(Long id, BaseState state, int page) {
+    public List<Widget> findByUserIdAndStateOffsetPageLimitDesc(Long id, BaseState state, int page) {
         return query.selectFrom(widget).join(bookMark).on(widget.bookmark.id.eq(bookMark.id)).fetchJoin()
                 .where(widget.user.id.eq(id).and(widget.state.eq(state)))
                 .offset((long) (page - 1) * widgetLimit)
                 .limit(widgetLimit)
+                .orderBy(widget.id.desc())
                 .fetch();
 
     }

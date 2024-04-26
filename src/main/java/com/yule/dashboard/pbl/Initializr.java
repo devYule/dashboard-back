@@ -1,19 +1,15 @@
 package com.yule.dashboard.pbl;
 
 import com.yule.dashboard.bookmark.BookmarkRepository;
-import com.yule.dashboard.entities.BookMark;
-import com.yule.dashboard.entities.Users;
-import com.yule.dashboard.entities.Widget;
-import com.yule.dashboard.entities.enums.BaseState;
-import com.yule.dashboard.entities.enums.TrueOrFalse;
-import com.yule.dashboard.entities.enums.WidgetSize;
-import com.yule.dashboard.entities.enums.WidgetType;
+import com.yule.dashboard.entities.*;
+import com.yule.dashboard.entities.enums.*;
+import com.yule.dashboard.mypage.repositories.jparepo.SiteJpaRepository;
+import com.yule.dashboard.search.repositories.UserSiteRankJpaRepository;
 import com.yule.dashboard.user.repositories.jparepo.UserJpaRepository;
-import com.yule.dashboard.widget.WidgetRepository;
 import com.yule.dashboard.widget.repositories.jparepo.WidgetJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.remote.http.UrlPath;
+import org.apache.catalina.User;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
@@ -33,6 +29,8 @@ public class Initializr {
     private final UserJpaRepository userJpaRepository;
     private final WidgetJpaRepository widgetRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final SiteJpaRepository siteJpaRepository;
+    private final UserSiteRankJpaRepository userSiteRankJpaRepository;
 
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
@@ -45,8 +43,22 @@ public class Initializr {
                 .mail("testMail@mail.com")
                 .nick("testt")
                 .build();
+        Site naver = new Site(SiteType.NAVER, UserSiteRank.builder()
+                .user(user)
+                .count(0)
+                .build());
+        Site google = new Site(SiteType.GOOGLE, UserSiteRank.builder()
+                .user(user)
+                .count(0)
+                .build());
+        naver.setUser(user);
+        google.setUser(user);
+
         userJpaRepository.save(user);
         userJpaRepository.flush();
+        siteJpaRepository.save(naver);
+        siteJpaRepository.save(google);
+        siteJpaRepository.flush();
 
 
         for (int i = 0; i < 10; i++) {
@@ -85,7 +97,7 @@ public class Initializr {
         }
         widgetRepository.flush();
 
-        List<Widget> byUserIdAndStateOffsetPageLimit = widgetRepository.findByUserIdAndStateOffsetPageLimit(user.getId(), BaseState.ACTIVATED, 1);
+        List<Widget> byUserIdAndStateOffsetPageLimit = widgetRepository.findByUserIdAndStateOffsetPageLimitDesc(user.getId(), BaseState.ACTIVATED, 1);
         for (Widget widget : byUserIdAndStateOffsetPageLimit) {
             System.out.println("widget.getId() = " + widget.getId());
 

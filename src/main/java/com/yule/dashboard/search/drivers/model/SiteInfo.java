@@ -10,7 +10,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public abstract class SiteInfo {
+public  class SiteInfo {
     private String title;
     private String link;
     private final List<String> content = new ArrayList<>();

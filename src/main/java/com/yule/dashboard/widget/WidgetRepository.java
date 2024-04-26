@@ -23,8 +23,8 @@ public class WidgetRepository {
         return widgetJpaRepository.save(widget);
     }
 
-    public List<Widget> findByUserIdAndStateOffsetPageLimit(Long id, BaseState state, int page) {
-        return widgetJpaRepository.findByUserIdAndStateOffsetPageLimit(id, state, page);
+    public List<Widget> findByUserIdAndStateOffsetPageLimitDesc(Long id, BaseState state, int page) {
+        return widgetJpaRepository.findByUserIdAndStateOffsetPageLimitDesc(id, state, page);
 
     }
 

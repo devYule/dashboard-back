@@ -8,10 +8,10 @@ import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.entities.enums.HistoryType;
 import com.yule.dashboard.mypage.HistoryRepository;
 import com.yule.dashboard.mypage.SiteRepository;
+import com.yule.dashboard.pbl.aop.Retry;
 import com.yule.dashboard.pbl.exception.ClientException;
 import com.yule.dashboard.pbl.exception.ExceptionCause;
 import com.yule.dashboard.pbl.exception.ServerException;
-import com.yule.dashboard.pbl.mythreadpool.ThreadPoolProvider;
 import com.yule.dashboard.pbl.security.SecurityFacade;
 import com.yule.dashboard.search.drivers.DriverServiceProvider;
 import com.yule.dashboard.search.drivers.model.NaverSiteInfo;
@@ -36,18 +36,16 @@ public class SearchService {
     private final BookmarkRepository bookmarkRepository;
     private final DriverServiceProvider driverServiceProvider;
     private final SecurityFacade facade;
-    private final ExecutorService threadPool;
 
     public SearchService(HistoryRepository historyRepository, DriverServiceProvider driverServiceProvider, SiteRepository siteRepository,
                          UserRepository userRepository, BookmarkRepository bookmarkRepository,
-                         SecurityFacade facade, ThreadPoolProvider threadPoolProvider) {
+                         SecurityFacade facade) {
         this.historyRepository = historyRepository;
         this.driverServiceProvider = driverServiceProvider;
         this.siteRepository = siteRepository;
         this.userRepository = userRepository;
         this.bookmarkRepository = bookmarkRepository;
         this.facade = facade;
-        this.threadPool = threadPoolProvider.getThreadPool();
     }
 
     // logic
@@ -93,19 +91,20 @@ public class SearchService {
                 toList();
     }
 
+    @Retry
     private void threadAction(String query, List<Site> findSites,
                               Map<Integer, List<SearchDto>> unorderedResult) {
 
-        Map<Site, Future<List<? extends SiteInfo>>> futures = new HashMap<>();
+        Map<Site, Future<List<SiteInfo>>> futures = new HashMap<>();
         for (Site site : findSites) {
-            Future<List<? extends SiteInfo>> future = doCrawling(site, query);
+            Future<List<SiteInfo>> future = doCrawling(site, query);
             futures.put(site, future);
         }
 
 
         for (Site findSite : findSites) {
             try {
-                Future<List<? extends SiteInfo>> future = futures.get(findSite);
+                Future<List<SiteInfo>> future = futures.get(findSite);
                 List<? extends SiteInfo> siteInfos = future.get();
                 int mapKey = findSite.getSite().getValue();
                 unorderedResult.put(mapKey, siteInfos.stream().map(s -> SearchDto.builder()
@@ -123,12 +122,16 @@ public class SearchService {
     }
 
 
-    private Future<List<? extends SiteInfo>> doCrawling(Site userSite, String query) {
-        return threadPool.submit(() ->
-                switch (userSite.getSite().getValue()) {
-                    case 0 -> driverServiceProvider.naver(query);
-                    case 1 -> driverServiceProvider.google(query);
-                    default -> new ArrayList<>();
-                });
+    private Future<List<SiteInfo>> doCrawling(Site userSite, String query) {
+
+
+        if (userSite.getSite().getValue() == 0) {
+            return driverServiceProvider.naver(query);
+        }
+        if (userSite.getSite().getValue() == 1) {
+            return driverServiceProvider.google(query);
+        }
+        throw new ServerException();
+
     }
 }

@@ -2,6 +2,7 @@ package com.yule.dashboard.bookmark;
 
 import com.yule.dashboard.bookmark.model.data.req.BookmarkAddData;
 import com.yule.dashboard.bookmark.model.data.resp.BookmarkData;
+import com.yule.dashboard.bookmark.model.data.resp.BookmarkDataPage;
 import com.yule.dashboard.entities.BookMark;
 import com.yule.dashboard.entities.Users;
 import com.yule.dashboard.entities.Widget;
@@ -11,6 +12,9 @@ import com.yule.dashboard.pbl.security.SecurityFacade;
 import com.yule.dashboard.user.UserRepository;
 import com.yule.dashboard.widget.WidgetRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +36,23 @@ public class BookmarkService {
                 b.getUrl(),
                 b.getMemo()
         )).toList();
+    }
+
+    public BookmarkDataPage getBookmarksPage(int page) {
+        int maxContentSize = 5;
+        int offset = page - 1;
+        PageRequest pageable = PageRequest.of(offset, maxContentSize, Sort.by(Sort.Direction.DESC, "id"));
+        Page<BookMark> findBookmarks = bookmarkRepository.findByUserIdAndState(facade.getId(), BaseState.ACTIVATED, pageable);
+
+
+        return BookmarkDataPage.builder()
+                .hasNext(findBookmarks.hasNext() ? 1 : 0)
+                .bookmarks(findBookmarks.hasNext() ? findBookmarks.toList().subList(0, 5).stream()
+                        .map(b -> new BookmarkData(b.getId(), b.getTitle(), b.getUrl(), b.getMemo())).toList()
+                        :
+                        findBookmarks.stream()
+                                .map(b -> new BookmarkData(b.getId(), b.getTitle(), b.getUrl(), b.getMemo())).toList())
+                .build();
     }
 
     @Transactional

@@ -1,11 +1,14 @@
 package com.yule.dashboard.bookmark;
 
+import com.yule.dashboard.bookmark.model.data.resp.BookmarkData;
 import com.yule.dashboard.bookmark.repositories.jparepo.BookmarkJpaRepository;
 import com.yule.dashboard.entities.BookMark;
 import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.pbl.exception.ClientException;
 import com.yule.dashboard.pbl.exception.ExceptionCause;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
@@ -34,5 +37,9 @@ public class BookmarkRepository {
 
     public List<BookMark> findByUrlIn(List<String> totalUrls) {
         return bookmarkJpaRepository.findByUrlIn(totalUrls);
+    }
+
+    public Page<BookMark> findByUserIdAndState(Long userId, BaseState state, PageRequest page) {
+        return bookmarkJpaRepository.findByUserIdAndState(userId, state, page);
     }
 }

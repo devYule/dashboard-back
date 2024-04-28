@@ -43,9 +43,11 @@ public class DriverServiceProvider {
                 driverPool.returnDriver(driver);
             }
             log.trace("do naver search");
-            driver.get("https://www.naver.com");
-            driver.findElement(By.xpath("//*[@id=\"query\"]")).sendKeys(query);
-            driver.findElement(By.xpath("//button[@type=\"submit\"]")).click();
+//            driver.get("https://www.naver.com");
+//            driver.findElement(By.xpath("//*[@id=\"query\"]")).sendKeys(query);
+//            driver.findElement(By.xpath("//button[@type=\"submit\"]")).click();
+
+            driver.get("https://search.naver.com/search.naver?query=" + query);
 
             List<SiteInfo> result = new ArrayList<>();
 
@@ -172,16 +174,21 @@ public class DriverServiceProvider {
                 driverPool.returnDriver(driver);
             }
             log.trace("do google search");
-            driver.get("https://www.google.com");
-//            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(1));
+//            driver.get("https://www.google.com");
+////            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(1));
+//
+//
+//            log.trace("google try to get q");
+//            WebElement element = driver.findElement(By.cssSelector("[name='q']"));
+//            log.trace("google get q");
+//            element.sendKeys(query);
+//            element.submit();
+
+
+            driver.get("https://www.google.com/search?q=" + query);
+            driver.switchTo();
 
             List<SiteInfo> result = new ArrayList<>();
-
-            log.trace("google try to get q");
-            WebElement element = driver.findElement(By.cssSelector("[name='q']"));
-            log.trace("google get q");
-            element.sendKeys(query);
-            element.submit();
 
             sleepAndScrollToAndSleep(driver);
 

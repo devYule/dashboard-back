@@ -3,6 +3,7 @@ package com.yule.dashboard.search.drivers;
 import com.yule.dashboard.pbl.exception.ServerException;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -34,7 +35,7 @@ public class DriverPool {
     @EventListener(ApplicationReadyEvent.class)
     private void init() {
         for (int i = 0; i < driverSize; i++) {
-            drivers.add(new ChromeDriver());
+            drivers.add(getNewDriverWithOptions());
         }
     }
 
@@ -42,7 +43,7 @@ public class DriverPool {
         drivers.remove(oldDriver);
         using.remove(oldDriver);
         if (drivers.size() + using.size() == driverSize) throw new ServerException();
-        ChromeDriver driver = new ChromeDriver();
+        ChromeDriver driver = getNewDriverWithOptions();
         this.using.add(driver);
         return driver;
     }
@@ -58,7 +59,7 @@ public class DriverPool {
         } catch (RuntimeException e) {
             log.error("error", e);
             driver.quit();
-            drivers.add(new ChromeDriver());
+            drivers.add(getNewDriverWithOptions());
             using.remove(driver);
         }
     }
@@ -70,7 +71,7 @@ public class DriverPool {
             if (drivers.size() + using.size() < driverSize) {
                 int lacking = driverSize - (drivers.size() + using.size());
                 for (int i = 0; i < lacking; i++) {
-                    drivers.add(new ChromeDriver());
+                    drivers.add(getNewDriverWithOptions());
                 }
             }
             ChromeDriver driver = drivers.get(0);
@@ -88,6 +89,16 @@ public class DriverPool {
             int arg = retryCnt;
             return getDriver(++arg);
         }
+    }
+
+    private ChromeDriver getNewDriverWithOptions() {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("headless");
+        options.addArguments("--lang=ko");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-gpu");
+        return new ChromeDriver(options);
     }
 
 }

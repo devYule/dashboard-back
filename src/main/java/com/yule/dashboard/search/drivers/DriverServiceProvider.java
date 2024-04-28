@@ -173,7 +173,7 @@ public class DriverServiceProvider {
             }
             log.trace("do google search");
             driver.get("https://www.google.com");
-            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(1));
+//            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(1));
 
             List<SiteInfo> result = new ArrayList<>();
 

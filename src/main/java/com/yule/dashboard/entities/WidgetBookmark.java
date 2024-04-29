@@ -13,5 +13,5 @@
 //public class WidgetBookmark extends Widget {
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "bookmark_id")
-//    private BookMark bookmark;
+//    private Bookmark bookmark;
 //}

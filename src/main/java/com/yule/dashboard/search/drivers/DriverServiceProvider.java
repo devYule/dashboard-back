@@ -1,7 +1,13 @@
 package com.yule.dashboard.search.drivers;
 
+import com.yule.dashboard.bookmark.BookmarkRepository;
+import com.yule.dashboard.bookmark.BookmarkShotRepository;
+import com.yule.dashboard.entities.Bookmark;
+import com.yule.dashboard.entities.BookmarkScreenShot;
 import com.yule.dashboard.pbl.exception.ServerException;
 import com.yule.dashboard.pbl.mythreadpool.ThreadPoolProvider;
+import com.yule.dashboard.pbl.utils.enums.FileCategory;
+import com.yule.dashboard.pbl.utils.enums.FileType;
 import com.yule.dashboard.search.drivers.model.SiteInfo;
 import com.yule.dashboard.search.drivers.model.SiteCategories;
 import lombok.RequiredArgsConstructor;
@@ -10,9 +16,15 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
 
-import java.time.Duration;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
@@ -27,6 +39,12 @@ public class DriverServiceProvider {
     private long scrollWaitTimeMs;
     public final DriverPool driverPool;
     private final ThreadPoolProvider threadPoolProvider;
+    @Value("${crawling.screen-shot-wait-time-ms}")
+    private long bookmarkShotWaitTime;
+    @Value("${files.base-path}")
+    private String basePath;
+    private final BookmarkShotRepository bookmarkShotRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     public Future<List<SiteInfo>> naver(String query) {
         return threadPoolProvider.getThreadPool().submit(() -> {
@@ -59,20 +77,20 @@ public class DriverServiceProvider {
             List<WebElement> community = driver.findElements(By.xpath("//div[@class=\"detail_box\"]"));
             log.trace("base info loaded");
             for (WebElement comm : community) {
-                SiteInfo site = new SiteInfo();
-                result.add(site);
-                WebElement titleEl = comm.findElement(By.xpath(
-                        ".//a[contains(@class, \"title_link\") or contains(@class, \"title\")]"));
-                WebElement contentEl = comm.findElement(
-                        By.xpath(".//a[contains(@class, \"dsc_link\") or contains(@class, \"desc\")]"));
-                site.setTitle(titleEl.getText());
-                site.setLink(titleEl.getAttribute("href"));
-                site.getContent().add(contentEl.getText());
-                site.setCategory(SiteCategories.COMMUNITY);
-
                 try {
+                    SiteInfo site = new SiteInfo();
+                    WebElement titleEl = comm.findElement(By.xpath(
+                            ".//a[contains(@class, \"title_link\") or contains(@class, \"title\")]"));
+                    WebElement contentEl = comm.findElement(
+                            By.xpath(".//a[contains(@class, \"dsc_link\") or contains(@class, \"desc\")]"));
+                    site.setTitle(titleEl.getText());
+                    site.setLink(titleEl.getAttribute("href"));
+                    site.getContent().add(contentEl.getText());
+                    site.setCategory(SiteCategories.COMMUNITY);
+
                     WebElement iconEl = comm.findElement(By.xpath("./../div[contains(@class, user_box)]//img[@height=24]"));
                     site.setIconPath(iconEl.getAttribute("src"));
+                    result.add(site);
                 } catch (NoSuchElementException ignore) {
 
                 }
@@ -82,32 +100,38 @@ public class DriverServiceProvider {
             log.trace("wiki loaded");
             List<WebElement> naverWiki = driver.findElements(By.xpath("//div[@class=\"nkindic_basic\"]"));
             for (WebElement wiki : naverWiki) {
-                SiteInfo site = new SiteInfo();
-                result.add(site);
-                WebElement titleEl = wiki.findElement(By.xpath(".//h3[contains(@class, \"tit_area\")]/a"));
-                WebElement contentEl = wiki.findElement(By.xpath(".//div[contains(@class, \"content_desc\")]/a"));
-                site.setTitle(titleEl.getText());
-                site.setLink(titleEl.getAttribute("href"));
+                try {
+                    SiteInfo site = new SiteInfo();
+                    WebElement titleEl = wiki.findElement(By.xpath(".//h3[contains(@class, \"tit_area\")]/a"));
+                    WebElement contentEl = wiki.findElement(By.xpath(".//div[contains(@class, \"content_desc\")]/a"));
+                    site.setTitle(titleEl.getText());
+                    site.setLink(titleEl.getAttribute("href"));
 
-                site.getContent().add(contentEl.getText());
-                site.setCategory(SiteCategories.INFO);
+                    site.getContent().add(contentEl.getText());
+                    site.setCategory(SiteCategories.INFO);
+                    result.add(site);
+
+                } catch (NoSuchElementException ignore) {
+
+                }
             }
             // 네이버 뉴스
             log.trace("news loaded");
             List<WebElement> news = driver.findElements(By.xpath("//ul[@class=\"list_news\"]/li"));
             for (WebElement n : news) {
-                SiteInfo site = new SiteInfo();
-                result.add(site);
-                WebElement titleEl = n.findElement(By.xpath(".//a[contains(@class, \"news_tit\")]"));
-                WebElement contentEl = n.findElement(By.xpath(".//div[contains(@class, \"dsc_wrap\")]/a"));
-                site.setTitle(titleEl.getText());
-                site.setLink(titleEl.getAttribute("href"));
-                site.getContent().add(contentEl.getText());
-                site.setCategory(SiteCategories.NEWS);
-
                 try {
+                    SiteInfo site = new SiteInfo();
+                    WebElement titleEl = n.findElement(By.xpath(".//a[contains(@class, \"news_tit\")]"));
+                    WebElement contentEl = n.findElement(By.xpath(".//div[contains(@class, \"dsc_wrap\")]/a"));
+                    site.setTitle(titleEl.getText());
+                    site.setLink(titleEl.getAttribute("href"));
+                    site.getContent().add(contentEl.getText());
+                    site.setCategory(SiteCategories.NEWS);
+
+
                     WebElement iconEl = n.findElement(By.xpath(".//span[contains(@class, \"thumb_box\")]/img"));
                     site.setIconPath(iconEl.getAttribute("src"));
+                    result.add(site);
                 } catch (NoSuchElementException ignore) {
                 }
             }
@@ -115,45 +139,50 @@ public class DriverServiceProvider {
             log.trace("kin loaded");
             List<WebElement> kins = driver.findElements(By.xpath("//ul[@class=\"lst_nkin\"]/li"));
             for (WebElement kin : kins) {
-                WebElement titleEl = kin.findElement(By.xpath(".//a[contains(@class, \"question_text\")]"));
-                WebElement contentEl = kin.findElement(By.xpath(".//a[contains(@class, \"answer_text\")]"));
-                SiteInfo site = new SiteInfo();
-                result.add(site);
+                try {
+                    WebElement titleEl = kin.findElement(By.xpath(".//a[contains(@class, \"question_text\")]"));
+                    WebElement contentEl = kin.findElement(By.xpath(".//a[contains(@class, \"answer_text\")]"));
+                    SiteInfo site = new SiteInfo();
+                    site.setTitle(titleEl.getText());
+                    site.setLink(titleEl.getAttribute("href"));
+                    site.getContent().add(contentEl.getText());
 
-                site.setTitle(titleEl.getText());
-                site.setLink(titleEl.getAttribute("href"));
-                site.getContent().add(contentEl.getText());
+                    result.add(site);
+                } catch (NoSuchElementException ignore) {
 
+                }
             }
             // 기타
             log.trace("ect load");
             List<WebElement> ects = driver.findElements(By.xpath("//div[contains(@class, \"total_wrap\")]"));
 
             for (WebElement ect : ects) {
-                //div[contains(@class, "source_box")]/a/img : icon
-                //div[@class="total_tit"]/a : title & link
-                //div[contains(@class, "total_dsc")]/a : content
-                WebElement iconEl;
-                WebElement titleElAndLink;
-                List<WebElement> contentEl;
                 try {
+                    //div[contains(@class, "source_box")]/a/img : icon
+                    //div[@class="total_tit"]/a : title & link
+                    //div[contains(@class, "total_dsc")]/a : content
+                    WebElement iconEl;
+                    WebElement titleElAndLink;
+                    List<WebElement> contentEl;
+
                     iconEl = ect.findElement(By.xpath(".//div[contains(@class, \"source_box\")]/a/img"));
                     titleElAndLink = ect.findElement(By.xpath(".//div[@class=\"total_tit\"]/a"));
                     contentEl = ect.findElements(By.xpath(".//div[contains(@class, \"total_dsc\")]/a"));
+
+                    SiteInfo siteInfo = new SiteInfo();
+                    siteInfo.setTitle(titleElAndLink.getText());
+                    siteInfo.setLink(titleElAndLink.getAttribute("href"));
+                    siteInfo.setCategory(SiteCategories.ECT);
+                    siteInfo.setIconPath(iconEl.getAttribute("src"));
+                    for (WebElement content : contentEl) {
+                        siteInfo.getContent().add(content.getText());
+                    }
+                    result.add(siteInfo);
+                    
                 } catch (NoSuchElementException ignored) {
                     log.trace("passed");
-                    continue;
-                }
-                SiteInfo siteInfo = new SiteInfo();
-                result.add(siteInfo);
-                siteInfo.setTitle(titleElAndLink.getText());
-                siteInfo.setLink(titleElAndLink.getAttribute("href"));
-                siteInfo.setCategory(SiteCategories.ECT);
-                siteInfo.setIconPath(iconEl.getAttribute("src"));
-                for (WebElement content : contentEl) {
-                    siteInfo.getContent().add(content.getText());
-                }
 
+                }
             }
 
             return result;
@@ -229,7 +258,81 @@ public class DriverServiceProvider {
         });
     }
 
+    @Async
+    @Transactional
+    public void saveShot(String url, Long bookmarkId, Long userId) {
+        log.debug("DriverServiceProvider.saveShot()");
+        ChromeDriver driver = driverPool.getDriver();
+        driver.get(url);
+        try {
+            Thread.sleep(bookmarkShotWaitTime);
+        } catch (InterruptedException e) {
+            log.error("error", e);
+            return;
+        }
+
+        Path suffix = Paths.get(FileCategory.BOOKMARK.getValue(),
+                FileType.SHOT.getValue(), userId.toString(), bookmarkId.toString(), "shot.png");
+        Path path = Paths.get(
+                basePath, suffix.toString());
+        try {
+            if (Files.notExists(path)) {
+
+                Files.createDirectories(path.getParent());
+
+            }
+            File shot = driver.getScreenshotAs(OutputType.FILE);
+            FileCopyUtils.copy(shot, path.toFile());
+        } catch (IOException e) {
+            log.error("error", e);
+            return;
+        }
+        log.debug("shot is saved {}", path);
+
+        Bookmark findBookmark = bookmarkRepository.findByIdAndStateAndUserId(bookmarkId, userId);
+        BookmarkScreenShot saveBookmarkShot = BookmarkScreenShot.builder()
+                .shot(suffix.toString())
+                .bookmark(findBookmark)
+                .build();
+        bookmarkShotRepository.save(saveBookmarkShot);
+//        findBookmark.setBookmarkShot(saveBookmarkShot);
+    }
+
+    @Async
+    public void removeShot(Long bookmarkId, Long userId) {
+        log.debug("DriverServiceProvider.removeShot()");
+        Path path = Paths.get(
+                basePath, FileCategory.BOOKMARK.getValue(),
+                FileType.SHOT.getValue(), userId.toString(), bookmarkId.toString(), "shot.png");
+        if (Files.notExists(path)) {
+            return;
+        }
+        try {
+            removeAll(path);
+        } catch (IOException e) {
+            log.error("error", e);
+            return;
+        }
+        BookmarkScreenShot findBookmarkShot = bookmarkShotRepository.findByBookmarkId(bookmarkId);
+        bookmarkShotRepository.delete(findBookmarkShot);
+    }
     /* --- inner --- */
+
+    private void removeAll(Path totalPath) throws IOException {
+        Files.walkFileTree(totalPath, new SimpleFileVisitor<>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
 
     private void sleepAndScrollToAndSleep(ChromeDriver driver) {
         try {
@@ -241,4 +344,6 @@ public class DriverServiceProvider {
         }
 
     }
+
+
 }

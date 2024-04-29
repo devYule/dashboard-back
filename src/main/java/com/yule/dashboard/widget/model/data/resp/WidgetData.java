@@ -24,6 +24,7 @@ public record WidgetData(
         @Length(max = 10)
         String title,
         @Length(max = 50)
-        String memo
+        String memo,
+        String shot
 ) {
 }

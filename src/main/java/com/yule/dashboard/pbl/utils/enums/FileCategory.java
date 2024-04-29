@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum FileCategory {
-    USER("user");
+    USER("user"), BOOKMARK("bookmark");
 
     private final String value;
     FileCategory(String value) {

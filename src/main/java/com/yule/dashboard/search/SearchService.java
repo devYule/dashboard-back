@@ -1,7 +1,7 @@
 package com.yule.dashboard.search;
 
 import com.yule.dashboard.bookmark.BookmarkRepository;
-import com.yule.dashboard.entities.BookMark;
+import com.yule.dashboard.entities.Bookmark;
 import com.yule.dashboard.entities.Site;
 import com.yule.dashboard.entities.Users;
 import com.yule.dashboard.entities.enums.BaseState;
@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 @Service
@@ -72,7 +71,7 @@ public class SearchService {
         Map<String, SearchDto> totalUrls = new HashMap<>();
         unorderedResult.values().forEach(searchDtoList -> searchDtoList.forEach(dto -> totalUrls.put(dto.getLink(), dto)));
 
-        List<BookMark> bookmarkedUrls = bookmarkRepository.findByUrlIn(new ArrayList<>(totalUrls.keySet()));
+        List<Bookmark> bookmarkedUrls = bookmarkRepository.findByUrlIn(new ArrayList<>(totalUrls.keySet()));
         bookmarkedUrls.forEach(k -> {
             if (k.getState().equals(BaseState.DEACTIVATED)) return;
             totalUrls.get(k.getUrl()).setBookmarkId(k.getId());

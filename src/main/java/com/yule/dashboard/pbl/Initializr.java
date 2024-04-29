@@ -9,7 +9,6 @@ import com.yule.dashboard.user.repositories.jparepo.UserJpaRepository;
 import com.yule.dashboard.widget.repositories.jparepo.WidgetJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
@@ -82,7 +81,7 @@ public class Initializr {
                 memo.append(strs[j]);
             }
 
-            BookMark bookMark = new BookMark(title.toString(), "www." + url + ".com", memo.toString().repeat(1) + i);
+            Bookmark bookMark = new Bookmark(title.toString(), "www." + url + ".com", memo.toString().repeat(1) + i);
             Widget widget = new Widget(
                     i + 1,
                     WidgetSize.getByValue(randomWidth),

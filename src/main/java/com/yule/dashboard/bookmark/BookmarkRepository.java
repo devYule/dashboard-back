@@ -1,8 +1,7 @@
 package com.yule.dashboard.bookmark;
 
-import com.yule.dashboard.bookmark.model.data.resp.BookmarkData;
 import com.yule.dashboard.bookmark.repositories.jparepo.BookmarkJpaRepository;
-import com.yule.dashboard.entities.BookMark;
+import com.yule.dashboard.entities.Bookmark;
 import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.pbl.exception.ClientException;
 import com.yule.dashboard.pbl.exception.ExceptionCause;
@@ -19,27 +18,33 @@ import java.util.List;
 public class BookmarkRepository {
     private final BookmarkJpaRepository bookmarkJpaRepository;
 
-    public List<BookMark> findByUserIdDesc(Long id) {
+    public List<Bookmark> findByUserIdDesc(Long id) {
         return bookmarkJpaRepository.findByUserIdAndState(id, BaseState.ACTIVATED, Sort.by(Sort.Direction.DESC, "id"));
     }
 
-    public BookMark save(BookMark bookMark) {
+    public Bookmark save(Bookmark bookMark) {
         return bookmarkJpaRepository.save(bookMark);
     }
 
-    public BookMark findByIdAndStateAndUserId(Long id, Long userId) {
-        BookMark findBookmark = bookmarkJpaRepository.findByIdAndStateAndUserId(id, BaseState.ACTIVATED, userId);
+    public Bookmark findByIdAndStateAndUserId(Long id, Long userId) {
+        Bookmark findBookmark = bookmarkJpaRepository.findByIdAndStateAndUserId(id, BaseState.ACTIVATED, userId);
         if (findBookmark == null) {
             throw new ClientException(ExceptionCause.PRIMARY_KEY_IS_NOT_VALID);
         }
         return findBookmark;
     }
 
-    public List<BookMark> findByUrlIn(List<String> totalUrls) {
+    public List<Bookmark> findByUrlIn(List<String> totalUrls) {
         return bookmarkJpaRepository.findByUrlIn(totalUrls);
     }
 
-    public Page<BookMark> findByUserIdAndState(Long userId, BaseState state, PageRequest page) {
+    public Page<Bookmark> findByUserIdAndState(Long userId, BaseState state, PageRequest page) {
         return bookmarkJpaRepository.findByUserIdAndState(userId, state, page);
     }
+
+    public void flush() {
+        bookmarkJpaRepository.flush();
+    }
+
+
 }

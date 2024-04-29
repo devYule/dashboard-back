@@ -3,6 +3,7 @@ package com.yule.dashboard.widget;
 import com.yule.dashboard.pbl.BaseResponse;
 import com.yule.dashboard.widget.model.data.req.WidgetAddData;
 import com.yule.dashboard.widget.model.data.req.WidgetPatchData;
+import com.yule.dashboard.widget.model.data.resp.AddWidgetData;
 import com.yule.dashboard.widget.model.data.resp.WidgetData;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class WidgetController {
 
 
     @PostMapping
-    public BaseResponse addWidget(@RequestBody WidgetAddData data) {
+    public AddWidgetData addWidget(@RequestBody WidgetAddData data) {
         return widgetService.addWidget(data);
     }
 

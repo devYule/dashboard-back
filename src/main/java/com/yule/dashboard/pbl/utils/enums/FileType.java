@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum FileType {
-    PIC("pic");
+    PIC("pic"), SHOT("shot");
     private final String value;
 
     FileType(String value) {

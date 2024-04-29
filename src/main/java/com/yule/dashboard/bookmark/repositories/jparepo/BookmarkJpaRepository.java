@@ -1,7 +1,7 @@
 package com.yule.dashboard.bookmark.repositories.jparepo;
 
 import com.yule.dashboard.bookmark.repositories.queryrepo.BookmarkQueryRepository;
-import com.yule.dashboard.entities.BookMark;
+import com.yule.dashboard.entities.Bookmark;
 import com.yule.dashboard.entities.enums.BaseState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,14 +10,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface BookmarkJpaRepository extends JpaRepository<BookMark, Long>, BookmarkQueryRepository {
-    List<BookMark> findByUserIdAndState(Long id, BaseState state, Sort sort);
+public interface BookmarkJpaRepository extends JpaRepository<Bookmark, Long>, BookmarkQueryRepository {
+    List<Bookmark> findByUserIdAndState(Long id, BaseState state, Sort sort);
 
-    Page<BookMark> findByUserIdAndState(Long id, BaseState state, Pageable page);
+    Page<Bookmark> findByUserIdAndState(Long id, BaseState state, Pageable page);
 
-    List<BookMark> findByUserIdAndState(Long id, BaseState state);
+    List<Bookmark> findByUserIdAndState(Long id, BaseState state);
 
-    BookMark findByIdAndStateAndUserId(Long id, BaseState state, Long userId);
+    Bookmark findByIdAndStateAndUserId(Long id, BaseState state, Long userId);
 
-    List<BookMark> findByUrlIn(List<String> urls);
+    List<Bookmark> findByUrlIn(List<String> urls);
 }

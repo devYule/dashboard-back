@@ -1,7 +1,9 @@
 package com.yule.dashboard.widget;
 
 import com.yule.dashboard.bookmark.BookmarkRepository;
-import com.yule.dashboard.entities.BookMark;
+import com.yule.dashboard.bookmark.BookmarkShotRepository;
+import com.yule.dashboard.entities.Bookmark;
+import com.yule.dashboard.entities.BookmarkScreenShot;
 import com.yule.dashboard.entities.Users;
 import com.yule.dashboard.entities.Widget;
 import com.yule.dashboard.entities.enums.BaseState;
@@ -14,6 +16,7 @@ import com.yule.dashboard.pbl.utils.LogicUtils;
 import com.yule.dashboard.user.UserRepository;
 import com.yule.dashboard.widget.model.data.req.WidgetAddData;
 import com.yule.dashboard.widget.model.data.req.WidgetPatchData;
+import com.yule.dashboard.widget.model.data.resp.AddWidgetData;
 import com.yule.dashboard.widget.model.data.resp.WidgetData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,31 +31,38 @@ public class WidgetService {
     private final WidgetRepository widgetRepository;
     private final UserRepository userRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final BookmarkShotRepository bookmarkShotRepository;
     private final SecurityFacade facade;
 
-    public BaseResponse addWidget(WidgetAddData data) {
+    public AddWidgetData addWidget(WidgetAddData data) {
         Users findUser = userRepository.findById(facade.getId());
-        BookMark findBookmark = bookmarkRepository.findByIdAndStateAndUserId(data.bookmarkId(), findUser.getId());
+//        Bookmark findBookmark = bookmarkRepository.findByIdAndStateAndUserId(data.bookmarkId(), findUser.getId());
+        BookmarkScreenShot findBookmarkShot = bookmarkShotRepository.findByBookmarkId(data.bookmarkId());
+        Bookmark findBookmark = findBookmarkShot.getBookmark();
         Widget widget = new Widget(data.order(), WidgetSize.getByValue(data.width()), WidgetSize.getByValue(data.height()),
                 data.url(), TrueOrFalse.getByValue(data.isShown()), data.type() == 0 ? WidgetType.BOOKMARK :
                 WidgetType.UTILS, data.type() == 0 ? findBookmark : null);
         widget.setUser(findUser);
 
-        return BaseResponse.builder().value(widgetRepository.save(widget).getId()).build();
+//        return AddWidgetData.builder().value(widgetRepository.save(widget).getId()).build();
+        return new AddWidgetData(widgetRepository.save(widget).getId(), findBookmarkShot.getShot());
 
     }
 
     @Transactional
     public List<WidgetData> getAllWidgets(int page) {
-        return widgetRepository.findByUserIdAndStateOffsetPageLimitDesc(facade.getId(), BaseState.ACTIVATED, page)
-                .stream()
-                .map(w -> new WidgetData(
-                        w.getId(), w.getOrder(), w.getWidth().getValue(),
-                        w.getHeight().getValue(),
-                        w.getUrl(),
-                        w.getIsShown().getValue(),
-                        w.getBookmark().getTitle(),
-                        w.getBookmark().getMemo())).toList();
+//        return widgetRepository.findByUserIdAndStateOffsetPageLimitDesc(facade.getId(), BaseState.ACTIVATED, page)
+//                .stream()
+//                .map(w -> new WidgetData(
+//                        w.getId(), w.getOrder(), w.getWidth().getValue(),
+//                        w.getHeight().getValue(),
+//                        w.getUrl(),
+//                        w.getIsShown().getValue(),
+//                        w.getBookmark().getTitle(),
+//                        w.getBookmark().getMemo(), null)).toList();
+
+        return widgetRepository.findWidgetInfo(facade.getId(), BaseState.ACTIVATED, page);
+
     }
 
     public BaseResponse patchWidget(WidgetPatchData data) {

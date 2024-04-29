@@ -1,15 +1,17 @@
 package com.yule.dashboard.widget;
 
-import com.yule.dashboard.entities.BookMark;
+import com.yule.dashboard.entities.Bookmark;
 import com.yule.dashboard.entities.Widget;
 import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.pbl.exception.ClientException;
 import com.yule.dashboard.pbl.exception.ExceptionCause;
+import com.yule.dashboard.widget.model.data.resp.WidgetData;
 import com.yule.dashboard.widget.repositories.jparepo.WidgetJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Repository
@@ -37,7 +39,11 @@ public class WidgetRepository {
         return widgetJpaRepository.findByUserIdAndState(id, baseState);
     }
 
-    public List<Widget> findByBookMarkAndState(BookMark findBookmark, BaseState baseState) {
+    public List<Widget> findByBookMarkAndState(Bookmark findBookmark, BaseState baseState) {
         return widgetJpaRepository.findByBookmarkAndState(findBookmark, baseState);
+    }
+
+    public List<WidgetData> findWidgetInfo(Long id, BaseState baseState, int page) {
+        return widgetJpaRepository.findWidgetInfo(id, baseState, page);
     }
 }

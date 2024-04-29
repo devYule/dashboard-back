@@ -23,7 +23,6 @@ public class Data extends BaseAt {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId")
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private Users user;
 
     @Enumerated(EnumType.STRING)

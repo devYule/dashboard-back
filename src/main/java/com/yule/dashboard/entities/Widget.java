@@ -5,7 +5,6 @@ import com.yule.dashboard.entities.enums.WidgetSize;
 import com.yule.dashboard.entities.enums.WidgetType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.openqa.selenium.remote.http.UrlPath;
 
 @Getter
 @Setter
@@ -24,6 +23,7 @@ public class Widget extends Data {
     @Enumerated(EnumType.STRING)
     private WidgetSize height;
 
+    @Column(length = 2147483647)
     private String url;
     @Enumerated(EnumType.STRING)
     private TrueOrFalse isShown;
@@ -32,7 +32,7 @@ public class Widget extends Data {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bookmark_id")
-    private BookMark bookmark;
+    private Bookmark bookmark;
 
     public Widget setIfNotNullData(
             Integer order,

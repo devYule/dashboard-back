@@ -1,7 +1,7 @@
 package com.yule.dashboard.my;
 
 import com.yule.dashboard.bookmark.repositories.jparepo.BookmarkJpaRepository;
-import com.yule.dashboard.entities.BookMark;
+import com.yule.dashboard.entities.Bookmark;
 import com.yule.dashboard.entities.History;
 import com.yule.dashboard.entities.Users;
 import com.yule.dashboard.entities.enums.BaseState;
@@ -82,14 +82,14 @@ public class Sketchbook {
     @DisplayName("findByUserId check")
     void test2() {
 
-        BookMark bookMark = new BookMark("test", "etst", "seta");
+        Bookmark bookMark = new Bookmark("test", "etst", "seta");
         bookMark.setUser(user);
-        BookMark saveBookmark = bookmarkJpaRepository.save(bookMark);
+        Bookmark saveBookmark = bookmarkJpaRepository.save(bookMark);
         bookmarkJpaRepository.flush();
 
-        List<BookMark> findBookmarks = bookmarkJpaRepository.findByUserIdAndState(user.getId(), BaseState.ACTIVATED);
+        List<Bookmark> findBookmarks = bookmarkJpaRepository.findByUserIdAndState(user.getId(), BaseState.ACTIVATED);
         System.out.println("findBookmarks.size() = " + findBookmarks.size());
-        for (BookMark findBookmark : findBookmarks) {
+        for (Bookmark findBookmark : findBookmarks) {
             System.out.println("findBookmark.getMemo() = " + findBookmark.getMemo());
         }
         System.out.println("userJpaRepository.findByLoginIdAndState(saveUser.getLoginId(), BaseState.ACTIVATED) = " + userJpaRepository.findByLoginIdAndState(user.getLoginId(), BaseState.ACTIVATED).getLoginId());

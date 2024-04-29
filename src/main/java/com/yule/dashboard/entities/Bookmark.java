@@ -1,7 +1,6 @@
 package com.yule.dashboard.entities;
 
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
@@ -11,8 +10,12 @@ import lombok.*;
 @AllArgsConstructor
 @Entity
 @DiscriminatorValue("bookmark")
-public class BookMark extends Data {
+public class Bookmark extends Data {
     private String title;
+    @Column(length = 2147483647)
     private String url;
     private String memo;
+//    @OneToOne(cascade = CascadeType.PERSIST)
+//    @JoinColumn(name = "bookmarkShotId")
+//    private BookmarkScreenShot bookmarkShot;
 }

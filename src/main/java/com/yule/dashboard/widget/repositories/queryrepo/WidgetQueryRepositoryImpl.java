@@ -40,20 +40,12 @@ public class WidgetQueryRepositoryImpl implements WidgetQueryRepository {
 
     @Override
     public List<WidgetData> findWidgetInfo(Long id, BaseState baseState, int page) {
-//        return widgetRepository.findWidgetInfo(facade.getId(), BaseState.ACTIVATED, page)
-//                .stream()
-//                .map(w -> new WidgetData(
-//                        w.getId(), w.getOrder(), w.getWidth().getValue(),
-//                        w.getHeight().getValue(),
-//                        w.getUrl(),
-//                        w.getIsShown().getValue(),
-//                        w.getBookmark().getTitle(),
-//                        w.getBookmark().getMemo(), null)).toList();
-        return query.select(Projections.bean(WidgetDataDto.class, widget.id.as("id"), widget.order.as("order"),
+
+        return query.select(Projections.bean(WidgetDataDto.class,
+                        widget.id.as("id"),
                         widget.width.as("width"),
                         widget.height.as("height"),
                         widget.url.as("url"),
-                        widget.isShown.as("isShown"),
                         widget.bookmark.title.as("title"), widget.bookmark.memo.as("memo"),
                         bookmarkScreenShot.shot.as("shot")))
                 .from(widget).leftJoin(bookmark).on(widget.bookmark.id.eq(bookmark.id))

@@ -83,11 +83,9 @@ public class Initializr {
 
             Bookmark bookMark = new Bookmark(title.toString(), "www." + url + ".com", memo.toString().repeat(1) + i);
             Widget widget = new Widget(
-                    i + 1,
                     WidgetSize.getByValue(randomWidth),
                     WidgetSize.getByValue(randomHeight),
                     "www." + url + ".com",
-                    TrueOrFalse.TRUE,
                     WidgetType.BOOKMARK,
                     bookMark);
             widget.setUser(user);

@@ -22,8 +22,6 @@ public class UserSiteRank {
 
 //    private SiteType site;
 
-
-
     private long count;
 
 }

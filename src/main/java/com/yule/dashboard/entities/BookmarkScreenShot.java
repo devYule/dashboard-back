@@ -1,5 +1,6 @@
 package com.yule.dashboard.entities;
 
+import com.yule.dashboard.entities.superclasses.CreatedAt;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Entity
-public class BookmarkScreenShot {
+public class BookmarkScreenShot extends CreatedAt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

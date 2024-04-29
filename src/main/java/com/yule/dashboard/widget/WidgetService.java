@@ -30,7 +30,6 @@ public class WidgetService {
 
     private final WidgetRepository widgetRepository;
     private final UserRepository userRepository;
-    private final BookmarkRepository bookmarkRepository;
     private final BookmarkShotRepository bookmarkShotRepository;
     private final SecurityFacade facade;
 
@@ -39,9 +38,12 @@ public class WidgetService {
 //        Bookmark findBookmark = bookmarkRepository.findByIdAndStateAndUserId(data.bookmarkId(), findUser.getId());
         BookmarkScreenShot findBookmarkShot = bookmarkShotRepository.findByBookmarkId(data.bookmarkId());
         Bookmark findBookmark = findBookmarkShot.getBookmark();
-        Widget widget = new Widget(data.order(), WidgetSize.getByValue(data.width()), WidgetSize.getByValue(data.height()),
-                data.url(), TrueOrFalse.getByValue(data.isShown()), data.type() == 0 ? WidgetType.BOOKMARK :
-                WidgetType.UTILS, data.type() == 0 ? findBookmark : null);
+        Widget widget = new Widget(
+//                data.order(),
+                WidgetSize.getByValue(data.width()), WidgetSize.getByValue(data.height()),
+                data.url(),
+//                TrueOrFalse.getByValue(data.isShown()),
+                WidgetType.BOOKMARK, data.type() == 0 ? findBookmark : null);
         widget.setUser(findUser);
 
 //        return AddWidgetData.builder().value(widgetRepository.save(widget).getId()).build();
@@ -71,11 +73,11 @@ public class WidgetService {
         Widget findWidget = widgetRepository.findByIdAndUserIdAndState(data.id(), facade.getId(), BaseState.ACTIVATED);
         return BaseResponse.builder()
                 .value(findWidget.setIfNotNullData(
-                        data.order(),
+//                        data.order(),
                         data.width(),
                         data.height(),
-                        data.url(),
-                        data.isShown()
+                        data.url()
+//                        data.isShown()
                 ).getId()).build();
     }
 

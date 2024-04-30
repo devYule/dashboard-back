@@ -1,6 +1,7 @@
 package com.yule.dashboard.search.drivers.model;
 
 import com.yule.dashboard.entities.enums.SiteType;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;

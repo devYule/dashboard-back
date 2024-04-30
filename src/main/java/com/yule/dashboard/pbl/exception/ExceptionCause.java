@@ -30,6 +30,8 @@ public enum ExceptionCause {
     REQUEST_VALUE_RANGE_ERROR(481, ExceptionMessages.REQUEST_VALUE_RANGE_ERROR),
     RETRY_SIGN_IN(480, ExceptionMessages.RETRY_SIGN_IN),
     SITE_IS_EMPTY(479, ExceptionMessages.SITE_IS_EMPTY),
+    QUERY_ERROR(478, ExceptionMessages.QUERY_ERROR),
+    TYPE_ERROR(476, ExceptionMessages.TYPE_ERROR)
 
     ;
     private final int code;

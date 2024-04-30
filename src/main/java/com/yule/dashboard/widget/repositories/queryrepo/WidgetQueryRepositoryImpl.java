@@ -46,7 +46,8 @@ public class WidgetQueryRepositoryImpl implements WidgetQueryRepository {
                         widget.width.as("width"),
                         widget.height.as("height"),
                         widget.url.as("url"),
-                        widget.bookmark.title.as("title"), widget.bookmark.memo.as("memo"),
+                        widget.bookmark.title.as("title"),
+                        widget.bookmark.memo.as("memo"),
                         bookmarkScreenShot.shot.as("shot")))
                 .from(widget).leftJoin(bookmark).on(widget.bookmark.id.eq(bookmark.id))
                 .leftJoin(bookmarkScreenShot).on(bookmarkScreenShot.bookmark.id.eq(bookmark.id))
@@ -55,9 +56,9 @@ public class WidgetQueryRepositoryImpl implements WidgetQueryRepository {
                 .offset((long) (page - 1) * widgetLimit)
                 .limit(widgetLimit)
                 .fetch()
-                .stream().map(dto -> new WidgetData(dto.getId(), dto.getOrder(), dto.getWidth().getValue(),
+                .stream().map(dto -> new WidgetData(dto.getId(), dto.getWidth().getValue(),
                         dto.getHeight().getValue(),
-                        dto.getUrl(), dto.getIsShown().getValue(), dto.getTitle(), dto.getMemo(), dto.getShot())).toList();
+                        dto.getUrl(), dto.getTitle(), dto.getMemo(), dto.getShot())).toList();
 
     }
 

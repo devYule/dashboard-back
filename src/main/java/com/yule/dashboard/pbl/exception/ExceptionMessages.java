@@ -27,4 +27,6 @@ public interface ExceptionMessages {
     String REQUEST_VALUE_RANGE_ERROR = "request value range must be ";
     String RETRY_SIGN_IN = "retry sign up";
     String SITE_IS_EMPTY = "site is empty";
+    String QUERY_ERROR = "bad search query";
+    String TYPE_ERROR = "bad type";
 }

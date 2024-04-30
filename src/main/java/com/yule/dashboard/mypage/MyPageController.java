@@ -81,4 +81,5 @@ public class MyPageController {
             @RequestParam int id) {
         return myPageService.removeSite(id);
     }
+
 }

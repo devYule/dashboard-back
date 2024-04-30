@@ -9,11 +9,9 @@ import lombok.Setter;
 @Setter
 public class WidgetDataDto {
     private Long id;
-    private int order;
     private WidgetSize width;
     private WidgetSize height;
     private String url;
-    private TrueOrFalse isShown;
     private String title;
     private String memo;
     private String shot;

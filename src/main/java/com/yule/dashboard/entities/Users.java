@@ -3,14 +3,9 @@ package com.yule.dashboard.entities;
 import com.yule.dashboard.entities.superclasses.CreatedAt;
 import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.entities.enums.SearchbarStyle;
+import com.yule.dashboard.search.model.SearchType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.DialectOverride;
-import org.springframework.boot.context.properties.bind.DefaultValue;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -40,6 +35,9 @@ public class Users extends CreatedAt {
 
 //    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
 //    private List<Site> sites = new ArrayList<>();
+
+    @Builder.Default
+    private SearchType searchType = SearchType.JSOUP;
 
 
 }

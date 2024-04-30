@@ -8,6 +8,7 @@ import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.entities.enums.HistoryType;
 import com.yule.dashboard.mypage.HistoryRepository;
 import com.yule.dashboard.mypage.SiteRepository;
+import com.yule.dashboard.pbl.BaseResponse;
 import com.yule.dashboard.pbl.aop.Retry;
 import com.yule.dashboard.pbl.exception.ClientException;
 import com.yule.dashboard.pbl.exception.ExceptionCause;
@@ -16,11 +17,13 @@ import com.yule.dashboard.pbl.security.SecurityFacade;
 import com.yule.dashboard.search.drivers.DriverServiceProvider;
 import com.yule.dashboard.search.drivers.model.NaverSiteInfo;
 import com.yule.dashboard.search.drivers.model.SiteInfo;
+import com.yule.dashboard.search.model.SearchType;
 import com.yule.dashboard.search.model.req.SearchDto;
 import com.yule.dashboard.search.model.resp.SiteRespData;
 import com.yule.dashboard.user.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -59,10 +62,13 @@ public class SearchService {
         // 멀티스레드이므로 순서보장이 안됨 -> orderedUserSiteRanking 과 같은 key를 가짐이 보장되는 ( site num ) hashMap 을 만들어,
         // 마지막 리턴 전에 sort 수행.
         Map<Integer, List<SearchDto>> unorderedResult = new HashMap<>();
-        threadAction(query, findSites, unorderedResult);
+
+        Users findUser = userRepository.findById(facade.getId());
+
+        threadAction(query, findSites, unorderedResult, findUser.getSearchType());
 
         // add history
-        Users findUser = userRepository.findById(facade.getId());
+
         historyRepository.saveHistory(findUser, historyRepository.findPrevHistory(findUser, HistoryType.SEARCH),
                 HistoryType.SEARCH, query);
 
@@ -92,11 +98,12 @@ public class SearchService {
 
     @Retry
     private void threadAction(String query, List<Site> findSites,
-                              Map<Integer, List<SearchDto>> unorderedResult) {
+                              Map<Integer, List<SearchDto>> unorderedResult,
+                              SearchType type) {
 
         Map<Site, Future<List<SiteInfo>>> futures = new HashMap<>();
         for (Site site : findSites) {
-            Future<List<SiteInfo>> future = doCrawling(site, query);
+            Future<List<SiteInfo>> future = doCrawling(site, query, type);
             futures.put(site, future);
         }
 
@@ -121,16 +128,28 @@ public class SearchService {
     }
 
 
-    private Future<List<SiteInfo>> doCrawling(Site userSite, String query) {
-
+    private Future<List<SiteInfo>> doCrawling(Site userSite, String query, SearchType type) {
 
         if (userSite.getSite().getValue() == 0) {
-            return driverServiceProvider.naver(query);
+            return driverServiceProvider.naver(query, type);
         }
         if (userSite.getSite().getValue() == 1) {
-            return driverServiceProvider.google(query);
+            return driverServiceProvider.google(query, type);
         }
         throw new ServerException();
 
+    }
+
+    @Transactional
+    public BaseResponse changeSearchType(SearchType type) {
+        Users findUser = userRepository.findById(facade.getId());
+        if (findUser.getSearchType().equals(type)) return new BaseResponse((long) type.getValue());
+        findUser.setSearchType(type);
+
+        return new BaseResponse((long) findUser.getSearchType().getValue());
+    }
+
+    public BaseResponse getSearchType() {
+        return new BaseResponse((long) userRepository.findById(facade.getId()).getSearchType().getValue());
     }
 }

@@ -4,8 +4,6 @@ import com.yule.dashboard.bookmark.BookmarkRepository;
 import com.yule.dashboard.bookmark.BookmarkShotRepository;
 import com.yule.dashboard.entities.Bookmark;
 import com.yule.dashboard.entities.BookmarkScreenShot;
-import com.yule.dashboard.pbl.exception.ClientException;
-import com.yule.dashboard.pbl.exception.ExceptionCause;
 import com.yule.dashboard.pbl.utils.enums.FileCategory;
 import com.yule.dashboard.pbl.utils.enums.FileType;
 import com.yule.dashboard.search.drivers.model.SiteInfo;
@@ -95,7 +93,8 @@ public class DriverServiceProvider {
                 .bookmark(findBookmark)
                 .build();
         bookmarkShotRepository.save(saveBookmarkShot);
-//        findBookmark.setBookmarkShot(saveBookmarkShot);
+        driverPool.returnDriver(driver);
+
     }
 
     @Async
@@ -134,16 +133,7 @@ public class DriverServiceProvider {
         });
     }
 
-//    private void sleepAndScrollToAndSleep(ChromeDriver driver) {
-//        try {
-//            Thread.sleep(scrollWaitTimeMs);
-//            new Actions(driver).sendKeys(Keys.END).perform();
-//            Thread.sleep(waitTimeMs);
-//        } catch (InterruptedException e) {
-//            throw new ServerException(e);
-//        }
-//
-//    }
+
 
 
 }

@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Profile("local")
-@Component
+//@Component
 @RequiredArgsConstructor
 @Slf4j
 public class Initializr {

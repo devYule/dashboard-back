@@ -24,8 +24,11 @@ public class SecurityFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = provider.getTokenFromHeader(request);
 
+
         if (token != null) {
-            if (provider.isValidatedToken(token)) {
+            log.info("request.getRequestURI() = {}", request.getRequestURI());
+
+            if (!request.getRequestURI().equals("/api/user/rt") && provider.isValidatedToken(token)) {
                 Authentication auth = provider.getAuthentication(token);
                 if (auth != null) {
                     SecurityContextHolder.getContext().setAuthentication(auth);

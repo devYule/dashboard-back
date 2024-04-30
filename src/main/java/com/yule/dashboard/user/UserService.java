@@ -146,7 +146,8 @@ public class UserService {
         if (rt == null) {
             throw new ClientException(ExceptionCause.TOKEN_IS_EXPIRED);
         }
-        return new AccessTokenData(genAndSaveToken(facade.getId()));
+        // get user pk from rt
+        return new AccessTokenData(genAndSaveToken(facade.getId(rt)));
     }
 
     /* --- Extracted Methods -- */

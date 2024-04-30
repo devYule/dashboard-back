@@ -119,7 +119,6 @@ public class UserService {
         userRepository.save(userInfo);
 
         return new RedisKeyData(data.key());
-
     }
 
     public LoginSuccessData mailCheck(SignupMailCheckData data) {

@@ -68,9 +68,6 @@ public class UserRepository {
         rep.set(RedisDataType.TOKEN.getValue() + at, rt, Duration.ofMillis(properties.getJwt().getRefreshTokenExpiry()));
     }
 
-//    public List<Widget> getAllWidgets(Long id, BaseState state, int page) {
-//        return widgetJpaRepository.findByUserIdAndStateOffsetPageLimit(id, state, page);
-//    }
 
     public List<Users> checkSignupInfo(String loginId, String nick) {
         return userQueryRepository.checkSignupInfo(loginId, nick);
@@ -82,10 +79,9 @@ public class UserRepository {
     }
 
     public String saveMailCode(String code) {
-
         // token and mail 에 key value 로 저장,
         // key 를 userInfo 에 저장.
-        // key 에는 userInfo 키가 있고, code 는 사용자가 입력해야할 code 가 들어 있음.
+        // key 에는 userInfo 키가 있고, 파라미터인 code 에는 사용자가 입력해야할 code 가 들어 있음.
         String mailKey = RedisUtils.genMailCode();
         long mailTimeoutMillis = redisUtils.getMailTimeoutMillis();
         redisTokenAndMailRepository.opsForValue().set(mailKey, code, Duration.ofMillis(mailTimeoutMillis));
@@ -119,9 +115,4 @@ public class UserRepository {
         redisUserRepository.deleteById(key);
     }
 
-
-
-//    public Users findUserWithSitesById(Long id) {
-//        return userQueryRepository.findUserWithSitesById(id);
-//    }
 }

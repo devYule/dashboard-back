@@ -3,6 +3,7 @@ package com.yule.dashboard.bookmark;
 import com.yule.dashboard.bookmark.model.data.req.BookmarkAddData;
 import com.yule.dashboard.bookmark.model.data.resp.BookmarkData;
 import com.yule.dashboard.bookmark.model.data.resp.BookmarkDataPage;
+import com.yule.dashboard.bookmark.model.data.resp.BookmarkRemoveData;
 import com.yule.dashboard.pbl.BaseResponse;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -33,7 +34,7 @@ public class BookmarkController {
     }
 
     @DeleteMapping
-    public BaseResponse removeBookmark(@NotNull @Min(1) @RequestParam Long id) {
+    public BookmarkRemoveData removeBookmark(@NotNull @Min(1) @RequestParam Long id) {
         return bookmarkService.removeBookmark(id);
     }
 

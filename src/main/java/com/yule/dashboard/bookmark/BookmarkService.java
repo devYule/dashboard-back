@@ -3,6 +3,7 @@ package com.yule.dashboard.bookmark;
 import com.yule.dashboard.bookmark.model.data.req.BookmarkAddData;
 import com.yule.dashboard.bookmark.model.data.resp.BookmarkData;
 import com.yule.dashboard.bookmark.model.data.resp.BookmarkDataPage;
+import com.yule.dashboard.bookmark.model.data.resp.BookmarkRemoveData;
 import com.yule.dashboard.entities.Bookmark;
 import com.yule.dashboard.entities.Users;
 import com.yule.dashboard.entities.Widget;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -71,14 +73,19 @@ public class BookmarkService {
     }
 
     @Transactional
-    public BaseResponse removeBookmark(Long id) {
+    public BookmarkRemoveData removeBookmark(Long id) {
         Bookmark findBookmark = bookmarkRepository.findByIdAndStateAndUserId(id, facade.getId());
         List<Widget> findWidgets = widgetRepository.findByBookMarkAndState(findBookmark, BaseState.ACTIVATED);
-        findWidgets.forEach(w -> w.setState(BaseState.DEACTIVATED));
+        List<Long> delWids = new ArrayList<>();
+        findWidgets.forEach(w -> {
+            w.setState(BaseState.DEACTIVATED);
+            delWids.add(w.getId());
+        });
         findBookmark.setState(BaseState.DEACTIVATED);
-//        findBookmark.setBookmarkShot(null);
         provider.removeShot(findBookmark.getId(), facade.getId());
-        return BaseResponse.builder().value(findBookmark.getId()).build();
+
+
+        return new BookmarkRemoveData(findBookmark.getId(), delWids);
     }
 
 

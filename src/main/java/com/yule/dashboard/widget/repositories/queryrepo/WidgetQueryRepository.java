@@ -9,5 +9,5 @@ import java.util.List;
 public interface WidgetQueryRepository {
     List<Widget> findByUserIdAndStateOffsetPageLimitDesc(Long id, BaseState state, int page);
 
-    List<WidgetData> findWidgetInfo(Long id, BaseState baseState, int page);
+    List<WidgetData> findWidgetInfo(Long id, BaseState baseState);
 }

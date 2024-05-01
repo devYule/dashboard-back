@@ -43,7 +43,7 @@ public class WidgetRepository {
         return widgetJpaRepository.findByBookmarkAndState(findBookmark, baseState);
     }
 
-    public List<WidgetData> findWidgetInfo(Long id, BaseState baseState, int page) {
-        return widgetJpaRepository.findWidgetInfo(id, baseState, page);
+    public List<WidgetData> findWidgetInfo(Long id, BaseState baseState) {
+        return widgetJpaRepository.findWidgetInfo(id, baseState);
     }
 }

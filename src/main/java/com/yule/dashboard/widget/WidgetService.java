@@ -35,35 +35,22 @@ public class WidgetService {
 
     public AddWidgetData addWidget(WidgetAddData data) {
         Users findUser = userRepository.findById(facade.getId());
-//        Bookmark findBookmark = bookmarkRepository.findByIdAndStateAndUserId(data.bookmarkId(), findUser.getId());
         BookmarkScreenShot findBookmarkShot = bookmarkShotRepository.findByBookmarkId(data.bookmarkId());
         Bookmark findBookmark = findBookmarkShot.getBookmark();
         Widget widget = new Widget(
-//                data.order(),
                 WidgetSize.getByValue(data.width()), WidgetSize.getByValue(data.height()),
                 data.url(),
-//                TrueOrFalse.getByValue(data.isShown()),
                 WidgetType.BOOKMARK, data.type() == 0 ? findBookmark : null);
         widget.setUser(findUser);
 
-//        return AddWidgetData.builder().value(widgetRepository.save(widget).getId()).build();
         return new AddWidgetData(widgetRepository.save(widget).getId(), findBookmarkShot.getShot());
 
     }
 
     @Transactional
-    public List<WidgetData> getAllWidgets(int page) {
-//        return widgetRepository.findByUserIdAndStateOffsetPageLimitDesc(facade.getId(), BaseState.ACTIVATED, page)
-//                .stream()
-//                .map(w -> new WidgetData(
-//                        w.getId(), w.getOrder(), w.getWidth().getValue(),
-//                        w.getHeight().getValue(),
-//                        w.getUrl(),
-//                        w.getIsShown().getValue(),
-//                        w.getBookmark().getTitle(),
-//                        w.getBookmark().getMemo(), null)).toList();
+    public List<WidgetData> getAllWidgets() {
 
-        return widgetRepository.findWidgetInfo(facade.getId(), BaseState.ACTIVATED, page);
+        return widgetRepository.findWidgetInfo(facade.getId(), BaseState.ACTIVATED);
 
     }
 

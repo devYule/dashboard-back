@@ -26,9 +26,9 @@ public class WidgetController {
         return widgetService.addWidget(data);
     }
 
-    @GetMapping("/{page}")
-    public List<WidgetData> getAllWidgets(@Min(1) @PathVariable int page) {
-        return widgetService.getAllWidgets(page);
+    @GetMapping
+    public List<WidgetData> getAllWidgets() {
+        return widgetService.getAllWidgets();
     }
 
     @PatchMapping

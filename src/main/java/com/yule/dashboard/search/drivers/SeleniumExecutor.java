@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 @Component
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 public class SeleniumExecutor {
 
     public final DriverPool driverPool;

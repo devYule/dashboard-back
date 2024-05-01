@@ -54,7 +54,7 @@ public class SearchService {
     public List<SiteRespData> search(String query) {
         List<Site> findSites = siteRepository.findByUserIdAndState(facade.getId(), BaseState.ACTIVATED);
         if (findSites.isEmpty()) throw new ClientException(ExceptionCause.SITE_IS_EMPTY);
-        // count 기준 desc -> site 식별자번호를 list 에 추가. -> 0번 idx 부터 count 순위로 내림차순 정렬.
+        // count 기준 desc -> site 식별자번호를 list 에 추가. -> 0번 idx 부터 count 빈도 순위로 내림차순 정렬.
         List<Integer> orderedUserSiteRanking = findSites.stream()
                 .sorted((s1, s2) -> (int) (s2.getRank().getCount() - s1.getRank().getCount()))
                 .map(s -> s.getSite().getValue()).toList();
@@ -65,39 +65,42 @@ public class SearchService {
 
         Users findUser = userRepository.findById(facade.getId());
 
+        // 웹 크롤링 위임
         threadAction(query, findSites, unorderedResult, findUser.getSearchType());
 
         // add history
-
         historyRepository.saveHistory(findUser, historyRepository.findPrevHistory(findUser, HistoryType.SEARCH),
                 HistoryType.SEARCH, query);
 
-
         // 북마크 여부 찾기
-        Map<String, SearchDto> totalUrls = new HashMap<>();
-        unorderedResult.values().forEach(searchDtoList -> searchDtoList.forEach(dto -> totalUrls.put(dto.getLink(), dto)));
+        Map<String, List<SearchDto>> totalUrls = new HashMap<>();
+        unorderedResult.values().forEach(searchDtoList -> searchDtoList.forEach(dto -> {
+            List<SearchDto> value = totalUrls.computeIfAbsent(dto.getLink(), k -> new ArrayList<>());
+            value.add(dto);
+        }));
 
-        List<Bookmark> bookmarkedUrls = bookmarkRepository.findByUrlIn(new ArrayList<>(totalUrls.keySet()));
-        bookmarkedUrls.forEach(k -> {
-            if (k.getState().equals(BaseState.DEACTIVATED)) return;
-            totalUrls.get(k.getUrl()).setBookmarkId(k.getId());
-        });
+        // 동일한 url 로 북마크 등록된 목록 찾기
+        List<Bookmark> bookmarkedUrls = bookmarkRepository.findByUserAndUrlInAndState(
+                findUser,
+                new ArrayList<>(totalUrls.keySet()),
+                BaseState.ACTIVATED
+        );
 
+        // 북마크 등록된 목록과 동일한 url 을 가진 검색 결과들에는 북마크 id 를 설정 ( 북마크 됨 표시 )
+        bookmarkedUrls.forEach(k -> totalUrls.get(k.getUrl()).forEach(obj -> obj.setBookmarkId(k.getId())));
 
-        return orderedUserSiteRanking.stream().
-
-                map(siteIdentity ->
-
-                {
+        // 사이드 선호도 순서대로 세팅하여 반환
+        return orderedUserSiteRanking
+                .stream()
+                .map(siteIdentity -> {
                     List<SearchDto> searchDtos = unorderedResult.get(siteIdentity);
                     return new SiteRespData(siteIdentity, searchDtos);
-                }).
-
-                toList();
+                })
+                .toList();
     }
 
-    @Retry
-    private void threadAction(String query, List<Site> findSites,
+    @Retry(3)
+    protected void threadAction(String query, List<Site> findSites,
                               Map<Integer, List<SearchDto>> unorderedResult,
                               SearchType type) {
 
@@ -106,7 +109,6 @@ public class SearchService {
             Future<List<SiteInfo>> future = doCrawling(site, query, type);
             futures.put(site, future);
         }
-
 
         for (Site findSite : findSites) {
             try {
@@ -152,4 +154,5 @@ public class SearchService {
     public BaseResponse getSearchType() {
         return new BaseResponse((long) userRepository.findById(facade.getId()).getSearchType().getValue());
     }
+
 }

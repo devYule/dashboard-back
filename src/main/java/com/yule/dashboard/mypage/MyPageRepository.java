@@ -63,9 +63,10 @@ public class MyPageRepository {
             throw new ServerException();
         }
         if (findInfo.getCode() == null || findInfo.getMail() == null) throw new ClientException(ExceptionCause.RETRY_SIGN_UP);
-
-        redisTokenAndMailRepository.delete(key);
         return findInfo;
     }
 
+    public void delete(String key) {
+        redisTokenAndMailRepository.delete(key);
+    }
 }

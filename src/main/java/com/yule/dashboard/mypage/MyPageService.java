@@ -43,7 +43,6 @@ public class MyPageService {
     private final MyPageRepository myPageRepository;
     private final UserRepository userRepository;
     private final SiteRepository siteRepository;
-    private final UserSiteRankRepository userSiteRankRepository;
     private final SecurityFacade facade;
     private final FileUtils fileUtils;
     private final PasswordEncoder encoder;
@@ -115,6 +114,9 @@ public class MyPageService {
         if (!findInfo.getCode().equals(data.code())) {
             throw new ClientException(ExceptionCause.AUTH_CODE_IS_NOT_MATCHES);
         }
+        // 캐시 삭제
+        myPageRepository.delete(data.key());
+
         // 유저 메일 변경
         Users findUser = userRepository.findById(facade.getId());
         String prevMail = findUser.getMail();

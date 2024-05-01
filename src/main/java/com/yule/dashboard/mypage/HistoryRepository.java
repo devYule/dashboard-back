@@ -1,13 +1,11 @@
 package com.yule.dashboard.mypage;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yule.dashboard.entities.History;
 import com.yule.dashboard.entities.Users;
 import com.yule.dashboard.entities.enums.HistoryType;
 import com.yule.dashboard.mypage.repositories.jparepo.HistoryJpaRepository;
 import com.yule.dashboard.pbl.aop.Retry;
-import com.yule.dashboard.pbl.exception.ServerException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -21,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class HistoryRepository {
 
     private final HistoryJpaRepository historyJpaRepository;
-    private final ObjectMapper om;
 
     public History findFirstByUserAndType(Users user, HistoryType historyType, Sort sort) {
         return historyJpaRepository.findFirstByUserAndType(user, historyType, sort);
@@ -38,6 +35,7 @@ public class HistoryRepository {
     }
 
     @Retry
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public History saveHistory(Users user, History prevHistory, HistoryType type, String value) {
         return save(History.builder()
                 .user(user)
@@ -47,18 +45,7 @@ public class HistoryRepository {
                 .build());
     }
 
-
-    @Retry
-    public History saveHistory(Users findUser, HistoryType historyType) {
-        String stringify;
-        try {
-            stringify = om.writeValueAsString(findUser);
-        } catch (JsonProcessingException e) {
-            throw new ServerException(e);
-        }
-        return saveHistory(findUser, historyType, stringify);
-    }
-
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public History findPrevHistory(Users user, HistoryType type) {
         return historyJpaRepository.findFirstByUserAndType(user, type, Sort.by(Sort.Direction.DESC, "id"));
     }

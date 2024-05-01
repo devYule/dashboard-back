@@ -7,8 +7,6 @@ import org.hibernate.validator.constraints.Length;
 
 public record WidgetData(
         Long id,
-//        @Min(1)
-//        int order,
         @Min(1)
         @Max(2)
         int width,
@@ -18,8 +16,6 @@ public record WidgetData(
         @NotBlank
         String url,
         @Min(0)
-//        @Max(1)
-//        int isShown,
         @NotBlank
         @Length(max = 10)
         String title,

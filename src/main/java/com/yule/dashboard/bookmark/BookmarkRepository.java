@@ -2,6 +2,7 @@ package com.yule.dashboard.bookmark;
 
 import com.yule.dashboard.bookmark.repositories.jparepo.BookmarkJpaRepository;
 import com.yule.dashboard.entities.Bookmark;
+import com.yule.dashboard.entities.Users;
 import com.yule.dashboard.entities.enums.BaseState;
 import com.yule.dashboard.pbl.exception.ClientException;
 import com.yule.dashboard.pbl.exception.ExceptionCause;
@@ -34,8 +35,8 @@ public class BookmarkRepository {
         return findBookmark;
     }
 
-    public List<Bookmark> findByUrlIn(List<String> totalUrls) {
-        return bookmarkJpaRepository.findByUrlIn(totalUrls);
+    public List<Bookmark> findByUserAndUrlInAndState(Users user, List<String> totalUrls, BaseState state) {
+        return bookmarkJpaRepository.findByUserAndUrlInAndState(user, totalUrls, state);
     }
 
     public Page<Bookmark> findByUserIdAndState(Long userId, BaseState state, PageRequest page) {

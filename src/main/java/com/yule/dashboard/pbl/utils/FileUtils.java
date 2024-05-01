@@ -6,8 +6,6 @@ import com.yule.dashboard.pbl.exception.ServerException;
 import com.yule.dashboard.pbl.utils.enums.FileCategory;
 import com.yule.dashboard.pbl.utils.enums.FileKind;
 import com.yule.dashboard.pbl.utils.enums.FileType;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -16,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -82,7 +79,6 @@ public class FileUtils {
     /* --- inner method --- */
     private Path genPath(String suffix) {
         return Path.of(basePath, suffix);
-//        return Paths.get(basePath, suffix);
     }
 
 }

@@ -75,9 +75,7 @@ public class DriverServiceProvider {
                 basePath, suffix.toString());
         try {
             if (Files.notExists(path)) {
-
                 Files.createDirectories(path.getParent());
-
             }
             File shot = driver.getScreenshotAs(OutputType.FILE);
             FileCopyUtils.copy(shot, path.toFile());

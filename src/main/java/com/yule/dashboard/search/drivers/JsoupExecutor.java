@@ -26,7 +26,6 @@ public class JsoupExecutor {
 
     private final ThreadPoolProvider threadPoolProvider;
 
-
     public Future<List<SiteInfo>> naver(String query) {
         log.debug("by Jsoup");
         return threadPoolProvider.getThreadPool().submit(() -> {
@@ -163,17 +162,20 @@ public class JsoupExecutor {
             } catch (IOException e) {
                 throw new ClientException(ExceptionCause.QUERY_ERROR);
             }
-            Elements elements = document.selectXpath("//div[@class='MjjYud']/div//div[@class='kb0PBd cvP2Ce ieodic jGGQ5e']");
+//            Elements elements = document.selectXpath("//div[@class='MjjYud']/div//div[@class='kb0PBd cvP2Ce ieodic jGGQ5e']");
+            Elements elements = document.selectXpath("//div[@class='MjjYud']//div[@class='N54PNb BToiNc cvP2Ce']");
 
             List<SiteInfo> result = new ArrayList<>();
 
             for (Element section : elements) {
                 try {
                     Elements titleEl = section.selectXpath(".//h3");
-                    Elements linkEl = section.selectXpath(".//parent::a");
+                    Elements linkEl = section.selectXpath(".//a");
                     Elements contentEl =
-                            section.selectXpath(".//parent::div//div[@class='VwiC3b yXK7lf lVm3ye r025kc hJNv6b']");
-                    Elements iconEl = section.selectXpath(".//parent::a//img");
+//                            section.selectXpath(".//parent::div//div[@class='VwiC3b yXK7lf lVm3ye r025kc hJNv6b']");
+                            section.selectXpath(".//div[@data-snf=\"nke7rc\"]");
+//                    Elements iconEl = section.selectXpath(".//parent::a//img");
+                    Elements iconEl = section.selectXpath(".//a//img");
 
                     SiteInfo site = new SiteInfo();
                     site.setTitle(titleEl.text());

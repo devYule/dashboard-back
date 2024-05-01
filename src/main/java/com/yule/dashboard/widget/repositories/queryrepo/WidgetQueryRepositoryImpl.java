@@ -39,7 +39,7 @@ public class WidgetQueryRepositoryImpl implements WidgetQueryRepository {
     }
 
     @Override
-    public List<WidgetData> findWidgetInfo(Long id, BaseState baseState, int page) {
+    public List<WidgetData> findWidgetInfo(Long id, BaseState baseState) {
 
         return query.select(Projections.bean(WidgetDataDto.class,
                         widget.id.as("id"),
@@ -53,8 +53,8 @@ public class WidgetQueryRepositoryImpl implements WidgetQueryRepository {
                 .leftJoin(bookmarkScreenShot).on(bookmarkScreenShot.bookmark.id.eq(bookmark.id))
                 .where(widget.user.id.eq(id).and(widget.state.eq(baseState)))
                 .orderBy(widget.id.desc())
-                .offset((long) (page - 1) * widgetLimit)
-                .limit(widgetLimit)
+//                .offset((long) (page - 1) * widgetLimit)
+//                .limit(widgetLimit)
                 .fetch()
                 .stream().map(dto -> new WidgetData(dto.getId(), dto.getWidth().getValue(),
                         dto.getHeight().getValue(),

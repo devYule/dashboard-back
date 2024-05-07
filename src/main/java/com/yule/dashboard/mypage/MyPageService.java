@@ -177,10 +177,8 @@ public class MyPageService {
     @Transactional
     public BaseResponse addSite(SiteData data) {
         Users findUser = userRepository.findById(facade.getId());
-        Site actiavtedSite = siteRepository.findByUserAndStateAndSite(findUser, BaseState.ACTIVATED, SiteType.getByValue(data.site()));
-        if (actiavtedSite != null) throw new ClientException(ExceptionCause.ID_IS_ALREADY_EXISTS);
         Site findSite =
-                siteRepository.findByUserAndStateAndSite(findUser, BaseState.DEACTIVATED, SiteType.getByValue(data.site()));
+                siteRepository.findByUserAndSite(findUser, SiteType.getByValue(data.site()));
         try {
             if (findSite == null) {
                 UserSiteRank rank = UserSiteRank.builder()
@@ -191,8 +189,11 @@ public class MyPageService {
                 saveSite.setUser(findUser);
                 return new BaseResponse((long) siteRepository.save(saveSite).getSite().getValue());
             }
-            findSite.setState(BaseState.ACTIVATED);
-            return new BaseResponse((long) findSite.getSite().getValue());
+            if (findSite.getState().equals(BaseState.DEACTIVATED)) {
+                findSite.setState(BaseState.ACTIVATED);
+                return new BaseResponse((long) findSite.getSite().getValue());
+            }
+            throw new ClientException(ExceptionCause.ID_IS_ALREADY_EXISTS);
         } finally {
             historyRepository.saveHistory(findUser, historyRepository.findPrevHistory(findUser, HistoryType.SITE), HistoryType.SITE,
                     "add:" + SiteType.getByValue(data.site()).name());

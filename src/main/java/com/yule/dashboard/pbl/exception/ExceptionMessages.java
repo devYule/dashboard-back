@@ -29,4 +29,5 @@ public interface ExceptionMessages {
     String SITE_IS_EMPTY = "site is empty";
     String QUERY_ERROR = "bad search query";
     String TYPE_ERROR = "bad type";
+    String ID_LANGUAGE_ERROR = "id language must be only english";
 }

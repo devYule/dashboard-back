@@ -14,4 +14,6 @@ public interface SiteJpaRepository extends JpaRepository<Site, Long> {
     Site findByUserAndStateAndSite(Users user, BaseState baseState, SiteType site);
 
     Site findByUserIdAndStateAndSite(Long userId, BaseState baseState, SiteType site);
+
+    Site findByUserAndSite(Users user, SiteType site);
 }

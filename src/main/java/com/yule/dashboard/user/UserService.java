@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 
 @Service
@@ -47,6 +48,7 @@ public class UserService {
     // 탈퇴: history 에 저장 ( em 으로 json 화 ) , Users 테이블에는 데이터 삭제
 
     public RedisKeyData checkId(CheckIdData loginId) {
+        if(Pattern.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*", loginId.loginId())) throw new ClientException(ExceptionCause.ID_LANGUAGE_ERROR);
         Users user = userRepository.findByLoginId(loginId.loginId());
         if (user == null) throw new ClientException(ExceptionCause.ID_NOT_EXISTS);
         RedisBaseUserInfoEntity cacheUser = RedisBaseUserInfoEntity.builder()

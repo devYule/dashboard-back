@@ -31,7 +31,8 @@ public enum ExceptionCause {
     RETRY_SIGN_IN(480, ExceptionMessages.RETRY_SIGN_IN),
     SITE_IS_EMPTY(479, ExceptionMessages.SITE_IS_EMPTY),
     QUERY_ERROR(478, ExceptionMessages.QUERY_ERROR),
-    TYPE_ERROR(476, ExceptionMessages.TYPE_ERROR)
+    TYPE_ERROR(476, ExceptionMessages.TYPE_ERROR),
+    ID_LANGUAGE_ERROR(475, ExceptionMessages.ID_LANGUAGE_ERROR)
 
     ;
     private final int code;

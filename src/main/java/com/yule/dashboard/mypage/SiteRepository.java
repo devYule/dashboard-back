@@ -31,4 +31,8 @@ public class SiteRepository {
     public Site save(Site saveSite) {
         return siteJpaRepository.save(saveSite);
     }
+
+    public Site findByUserAndSite(Users user, SiteType site) {
+        return siteJpaRepository.findByUserAndSite(user, site);
+    }
 }

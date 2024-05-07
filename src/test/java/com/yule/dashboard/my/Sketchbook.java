@@ -77,23 +77,23 @@ public class Sketchbook {
 
     }
 
-    @Test
-    @Rollback(value = false)
-    @DisplayName("findByUserId check")
-    void test2() {
-
-        Bookmark bookMark = new Bookmark("test", "etst", "seta");
-        bookMark.setUser(user);
-        Bookmark saveBookmark = bookmarkJpaRepository.save(bookMark);
-        bookmarkJpaRepository.flush();
-
-        List<Bookmark> findBookmarks = bookmarkJpaRepository.findByUserIdAndState(user.getId(), BaseState.ACTIVATED);
-        System.out.println("findBookmarks.size() = " + findBookmarks.size());
-        for (Bookmark findBookmark : findBookmarks) {
-            System.out.println("findBookmark.getMemo() = " + findBookmark.getMemo());
-        }
-        System.out.println("userJpaRepository.findByLoginIdAndState(saveUser.getLoginId(), BaseState.ACTIVATED) = " + userJpaRepository.findByLoginIdAndState(user.getLoginId(), BaseState.ACTIVATED).getLoginId());
-    }
+//    @Test
+//    @Rollback(value = false)
+//    @DisplayName("findByUserId check")
+//    void test2() {
+//
+//        Bookmark bookMark = new Bookmark("test", "etst", "seta");
+//        bookMark.setUser(user);
+//        Bookmark saveBookmark = bookmarkJpaRepository.save(bookMark);
+//        bookmarkJpaRepository.flush();
+//
+//        List<Bookmark> findBookmarks = bookmarkJpaRepository.findByUserIdAndState(user.getId(), BaseState.ACTIVATED);
+//        System.out.println("findBookmarks.size() = " + findBookmarks.size());
+//        for (Bookmark findBookmark : findBookmarks) {
+//            System.out.println("findBookmark.getMemo() = " + findBookmark.getMemo());
+//        }
+//        System.out.println("userJpaRepository.findByLoginIdAndState(saveUser.getLoginId(), BaseState.ACTIVATED) = " + userJpaRepository.findByLoginIdAndState(user.getLoginId(), BaseState.ACTIVATED).getLoginId());
+//    }
 
     @Test
     @Transactional

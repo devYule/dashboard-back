@@ -144,7 +144,6 @@ public class MyPageService {
         Users findUser = userRepository.findById(facade.getId());
 
 
-
         String stringify;
         try {
             stringify = om.writeValueAsString(new DeleteUserVo(findUser.getId(), findUser.getLoginId(), findUser.getNick(),
@@ -178,6 +177,8 @@ public class MyPageService {
     @Transactional
     public BaseResponse addSite(SiteData data) {
         Users findUser = userRepository.findById(facade.getId());
+        Site actiavtedSite = siteRepository.findByUserAndStateAndSite(findUser, BaseState.ACTIVATED, SiteType.getByValue(data.site()));
+        if (actiavtedSite != null) throw new ClientException(ExceptionCause.ID_IS_ALREADY_EXISTS);
         Site findSite =
                 siteRepository.findByUserAndStateAndSite(findUser, BaseState.DEACTIVATED, SiteType.getByValue(data.site()));
         try {

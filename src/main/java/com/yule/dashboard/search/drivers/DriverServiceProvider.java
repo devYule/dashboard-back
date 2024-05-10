@@ -61,38 +61,40 @@ public class DriverServiceProvider {
     public void saveShot(String url, Long bookmarkId, Long userId) {
         log.debug("DriverServiceProvider.saveShot()");
         ChromeDriver driver = driverPool.getDriver();
-        driver.get(url);
         try {
-            Thread.sleep(bookmarkShotWaitTime);
-        } catch (InterruptedException e) {
-            log.error("error", e);
-            return;
-        }
-
-        Path suffix = Paths.get(FileCategory.BOOKMARK.getValue(),
-                FileType.SHOT.getValue(), userId.toString(), bookmarkId.toString(), "shot.png");
-        Path path = Paths.get(
-                basePath, suffix.toString());
-        try {
-            if (Files.notExists(path)) {
-                Files.createDirectories(path.getParent());
+            driver.get(url);
+            try {
+                Thread.sleep(bookmarkShotWaitTime);
+            } catch (InterruptedException e) {
+                log.error("error", e);
+                return;
             }
-            File shot = driver.getScreenshotAs(OutputType.FILE);
-            FileCopyUtils.copy(shot, path.toFile());
-        } catch (IOException e) {
-            log.error("error", e);
-            return;
+
+            Path suffix = Paths.get(FileCategory.BOOKMARK.getValue(),
+                    FileType.SHOT.getValue(), userId.toString(), bookmarkId.toString(), "shot.png");
+            Path path = Paths.get(
+                    basePath, suffix.toString());
+            try {
+                if (Files.notExists(path)) {
+                    Files.createDirectories(path.getParent());
+                }
+                File shot = driver.getScreenshotAs(OutputType.FILE);
+                FileCopyUtils.copy(shot, path.toFile());
+            } catch (IOException e) {
+                log.error("error", e);
+                return;
+            }
+            log.debug("shot is saved {}", path);
+
+            Bookmark findBookmark = bookmarkRepository.findByIdAndStateAndUserId(bookmarkId, userId);
+            BookmarkScreenShot saveBookmarkShot = BookmarkScreenShot.builder()
+                    .shot(suffix.toString())
+                    .bookmark(findBookmark)
+                    .build();
+            bookmarkShotRepository.save(saveBookmarkShot);
+        } finally {
+            driverPool.returnDriver(driver);
         }
-        log.debug("shot is saved {}", path);
-
-        Bookmark findBookmark = bookmarkRepository.findByIdAndStateAndUserId(bookmarkId, userId);
-        BookmarkScreenShot saveBookmarkShot = BookmarkScreenShot.builder()
-                .shot(suffix.toString())
-                .bookmark(findBookmark)
-                .build();
-        bookmarkShotRepository.save(saveBookmarkShot);
-        driverPool.returnDriver(driver);
-
     }
 
     @Async
@@ -130,8 +132,6 @@ public class DriverServiceProvider {
             }
         });
     }
-
-
 
 
 }
